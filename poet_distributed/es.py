@@ -17,10 +17,10 @@ import logging
 import time
 import numpy as np
 from collections import namedtuple
-from .noise_module import noise
 from .stats import compute_centered_ranks, batched_weighted_sum
 from .logger import CSVLogger
 import json
+import functools
 
 StepStats = namedtuple('StepStats', [
     'po_returns_mean',
@@ -60,39 +60,41 @@ EvalResult = namedtuple('EvalResult', ['returns', 'lengths'])
 
 logger = logging.getLogger(__name__)
 
-def initialize_worker():
-    global niches, thetas, random_state, noise
+
+def initialize_master_fiber():
+    global noise
     from .noise_module import noise
-    import numpy as np
-    random_state = np.random.RandomState()
-    niches, thetas = {}, {}
 
+def initialize_worker_fiber(arg_thetas, arg_niches):
+    global noise, thetas, niches
+    from .noise_module import noise
+    thetas = arg_thetas
+    niches = arg_niches
 
-def set_worker_theta(theta, optim_id):
-    global thetas
-    thetas[optim_id] = theta
+@functools.lru_cache(maxsize=1000)
+def fiber_get_theta(iteration, optim_id):
+    return thetas[optim_id]
 
+@functools.lru_cache(maxsize=1000)
+def fiber_get_niche(iteration, optim_id):
+    return niches[optim_id]
 
-def run_eval_batch(optim_id, batch_size, rs_seed):
-    global noise, niches, thetas, random_state
-    niche = niches[optim_id]
-    theta = thetas[optim_id]
-
-    random_state.seed(rs_seed)
+def run_eval_batch_fiber(iteration, optim_id, batch_size, rs_seed):
+    global noise, niches, thetas
+    random_state = np.random.RandomState(rs_seed)
+    niche = fiber_get_niche(iteration, optim_id)
+    theta = fiber_get_theta(iteration, optim_id)
 
     returns, lengths = niche.rollout_batch((theta for i in range(batch_size)),
                                            batch_size, random_state, eval=True)
 
     return EvalResult(returns=returns, lengths=lengths)
 
-
-def run_po_batch(optim_id, batch_size, rs_seed, noise_std):
-    global noise, niches, thetas, random_state
-    niche = niches[optim_id]
-    theta = thetas[optim_id]
-
-    random_state.seed(rs_seed)
-
+def run_po_batch_fiber(iteration, optim_id, batch_size, rs_seed, noise_std):
+    global noise, niches, thetas
+    random_state = np.random.RandomState(rs_seed)
+    niche = fiber_get_niche(iteration, optim_id)
+    theta = fiber_get_theta(iteration, optim_id)
     noise_inds = np.asarray([noise.sample_index(random_state, len(theta))
                              for i in range(batch_size)],
                             dtype='int')
@@ -111,26 +113,12 @@ def run_po_batch(optim_id, batch_size, rs_seed, noise_std):
     return POResult(returns=returns, noise_inds=noise_inds, lengths=lengths)
 
 
-def setup_worker(optim_id, make_niche):
-    global niches
-    niches[optim_id] = make_niche()
-
-def cleanup_worker(optim_id):
-    global niches
-    niches.pop(optim_id, None)
-
-def add_env_to_niche(optim_id, env):
-    global niches
-    niches[optim_id].add_env(env)
-
-def delete_env_from_niche(optim_id, env_name):
-    global niches
-    niches[optim_id].delete_env(env_name)
-
 class ESOptimizer:
     def __init__(self,
                  engines,
                  scheduler,
+                 fiber_pool,
+                 fiber_shared,
                  theta,
                  make_niche,
                  learning_rate,
@@ -154,9 +142,13 @@ class ESOptimizer:
         from .optimizers import Adam, SimpleSGD
 
         logger.debug('Creating optimizer {}...'.format(optim_id))
+        self.fiber_pool = fiber_pool
+        self.fiber_shared = fiber_shared
+
         self.optim_id = optim_id
         self.engines = engines
-        engines.block = True
+        assert self.fiber_pool is not None
+
         self.scheduler = scheduler
 
         self.theta = theta
@@ -170,9 +162,9 @@ class ESOptimizer:
         self.noise_decay = noise_decay
         self.noise_limit = noise_limit
 
-        logger.debug('Optimizer {} setting up {} workers...'.format(
-            optim_id, len(self.engines)))
-        engines.apply(setup_worker, optim_id, make_niche)
+        self.fiber_shared = fiber_shared
+        niches = fiber_shared["niches"]
+        niches[optim_id] = make_niche()
 
         self.batches_per_chunk = batches_per_chunk
         self.batch_size = batch_size
@@ -244,10 +236,11 @@ class ESOptimizer:
         self.best_score = None
         self.best_theta = None
 
+        self.iteration = 0
+
     def __del__(self):
-        logger.debug('Optimizer {} cleanning up {} workers...'.format(
-            self.optim_id, len(self.engines)))
-        self.engines.apply(cleanup_worker, self.optim_id)
+        logger.debug('Optimizer {} cleanning up workers...'.format(
+            self.optim_id))
 
     def clean_dicts_before_iter(self):
         self.log_data.clear()
@@ -387,29 +380,41 @@ class ESOptimizer:
     def broadcast_theta(self, theta):
         '''On all worker, set thetas[this optimizer] to theta'''
         logger.debug('Optimizer {} broadcasting theta...'.format(self.optim_id))
-        self.engines.apply(set_worker_theta, theta, self.optim_id)
+
+        thetas = self.fiber_shared["thetas"]
+        thetas[self.optim_id] = theta
+        self.iteration += 1
+
 
     def add_env(self, env):
         '''On all worker, add env_name to niche'''
         logger.debug('Optimizer {} add env {}...'.format(self.optim_id, env.name))
-        self.engines.apply(add_env_to_niche, self.optim_id, env)
+
+        thetas = self.fiber_shared["niches"]
+        niches[self.optim_id].add_env(env)
 
     def delete_env(self, env_name):
         '''On all worker, delete env from niche'''
         logger.debug('Optimizer {} delete env {}...'.format(self.optim_id, env_name))
-        self.engines.apply(delete_env_from_niche, self.optim_id, env_name)
 
-    def start_chunk(self, runner, batches_per_chunk, batch_size, *args):
+        niches = self.fiber_shared["niches"]
+        niches[optim_id].delete_env(env_name)
+
+    def start_chunk_fiber(self, runner, batches_per_chunk, batch_size, *args):
         logger.debug('Optimizer {} spawning {} batches of size {}'.format(
             self.optim_id, batches_per_chunk, batch_size))
 
         rs_seeds = np.random.randint(np.int32(2 ** 31 - 1), size=batches_per_chunk)
-        #print(rs_seeds)
 
         chunk_tasks = []
+        pool = self.fiber_pool
+        niches = self.fiber_shared["niches"]
+        thetas = self.fiber_shared["thetas"]
+
         for i in range(batches_per_chunk):
             chunk_tasks.append(
-                self.scheduler.apply(runner, self.optim_id, batch_size, rs_seeds[i], *args))
+                pool.apply_async(runner, args=(self.iteration,
+                    self.optim_id, batch_size, rs_seeds[i])+args))
         return chunk_tasks
 
     def get_chunk(self, tasks):
@@ -468,8 +473,9 @@ class ESOptimizer:
         step_t_start = time.time()
         self.broadcast_theta(theta)
 
-        eval_tasks = self.start_chunk(
-            run_eval_batch, self.eval_batches_per_step, self.eval_batch_size)
+        eval_tasks = self.start_chunk_fiber(
+            run_eval_batch_fiber, self.eval_batches_per_step, self.eval_batch_size)
+
         return eval_tasks, theta, step_t_start
 
     def get_theta_eval(self, res):
@@ -501,8 +507,8 @@ class ESOptimizer:
             theta = self.theta
         self.broadcast_theta(theta)
 
-        step_results = self.start_chunk(
-            run_po_batch,
+        step_results = self.start_chunk_fiber(
+            run_po_batch_fiber,
             self.batches_per_chunk,
             self.batch_size,
             self.noise_std)

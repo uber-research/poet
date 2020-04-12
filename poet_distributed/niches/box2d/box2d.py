@@ -42,6 +42,22 @@ class Box2DNiche(Niche):
         self.model.make_env(seed=seed, env_config=DEFAULT_ENV)
         self.init = init
 
+    def __getstate__(self):
+        return {"env_configs": self.env_configs,
+                "seed": self.seed,
+                "stochastic": self.stochastic,
+                "init": self.init,
+                }
+
+    def __setstate__(self, state):
+        self.model = Model(bipedhard_custom)
+        self.env_configs = state["env_configs"]
+        self.seed = state["seed"]
+        self.stochastic = state["stochastic"]
+        self.model.make_env(seed=self.seed, env_config=DEFAULT_ENV)
+        self.init = state["init"]
+
+
     def add_env(self, env):
         env_name = env.name
         assert env_name not in self.env_configs.keys()

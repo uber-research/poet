@@ -17,7 +17,8 @@ from .logger import CSVLogger
 import logging
 logger = logging.getLogger(__name__)
 import numpy as np
-from poet_distributed.es import ESOptimizer, initialize_worker
+from poet_distributed.es import ESOptimizer
+from poet_distributed.es import initialize_worker_fiber
 from collections import OrderedDict
 from poet_distributed.niches.box2d.env import Env_config
 from poet_distributed.reproduce_ops import Reproducer
@@ -47,7 +48,20 @@ class MultiESOptimizer:
 
         self.args = args
         self.engines = engines
-        self.engines.block = True
+
+        import fiber as mp
+
+        mp_ctx = mp.get_context('spawn')
+        manager = mp_ctx.Manager()
+        self.manager = manager
+        self.fiber_shared = {
+                "niches": manager.dict(),
+                "thetas": manager.dict(),
+        }
+        self.fiber_pool = mp_ctx.Pool(args.num_workers, initializer=initialize_worker_fiber,
+                initargs=(self.fiber_shared["thetas"],
+                    self.fiber_shared["niches"]))
+
         self.scheduler = scheduler
         self.client = client
 
@@ -118,6 +132,8 @@ class MultiESOptimizer:
             optim_id=optim_id,
             engines=self.engines,
             scheduler=self.scheduler,
+            fiber_pool=self.fiber_pool,
+            fiber_shared=self.fiber_shared,
             theta=theta,
             make_niche=niche_fn,
             learning_rate=self.args.learning_rate,
@@ -202,8 +218,6 @@ class MultiESOptimizer:
             optimizer.update_dicts_after_es(stats=stats,
                 self_eval_stats=self_eval_stats)
 
-        self.clean_up_ipyparallel()
-
     def transfer(self, propose_with_adam, checkpointing, reset_optimizer):
         logger.info('Computing direct transfers...')
         for source_optim in self.optimizers.values():
@@ -243,8 +257,6 @@ class MultiESOptimizer:
         logger.info('Considering transfers...')
         for o in self.optimizers.values():
             o.pick_proposal(checkpointing, reset_optimizer)
-
-        self.clean_up_ipyparallel()
 
     def check_optimizer_status(self, iteration):
         '''

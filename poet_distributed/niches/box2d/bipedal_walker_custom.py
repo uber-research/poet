@@ -127,6 +127,9 @@ class BipedalWalkerCustom(gym.Env):
         'video.frames_per_second': FPS
     }
 
+    def __repr__(self):
+        return "{}\nenv\n{}".format(self.__dict__, self.__dict__["np_random"].get_state())
+
     def __init__(self, env_config):
         self.spec = None
         self.set_env_config(env_config)

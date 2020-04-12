@@ -104,6 +104,9 @@ class Model:
 
         self.render_mode = False
 
+    def __repr__(self):
+        return "{}".format(self.__dict__)
+
     def make_env(self, seed, render_mode=False, env_config=None):
         self.render_mode = render_mode
         self.env = make_env(self.env_name, seed=seed,
