@@ -44,10 +44,9 @@ def construct_niche_fns_from_env(args, env, seed):
 
 
 class MultiESOptimizer:
-    def __init__(self, args, engines, scheduler, client):
+    def __init__(self, args):
 
         self.args = args
-        self.engines = engines
 
         import fiber as mp
 
@@ -61,9 +60,6 @@ class MultiESOptimizer:
         self.fiber_pool = mp_ctx.Pool(args.num_workers, initializer=initialize_worker_fiber,
                 initargs=(self.fiber_shared["thetas"],
                     self.fiber_shared["niches"]))
-
-        self.scheduler = scheduler
-        self.client = client
 
         self.env_registry = OrderedDict()
         self.env_archive = OrderedDict()
@@ -130,8 +126,6 @@ class MultiESOptimizer:
 
         return ESOptimizer(
             optim_id=optim_id,
-            engines=self.engines,
-            scheduler=self.scheduler,
             fiber_pool=self.fiber_pool,
             fiber_shared=self.fiber_shared,
             theta=theta,
@@ -182,25 +176,6 @@ class MultiESOptimizer:
         assert optim_id in self.env_registry.keys()
         self.env_registry.pop(optim_id)
         logger.info('DELETED {} '.format(optim_id))
-
-    def clean_up_ipyparallel(self):
-        logger.debug('Clean up ipyparallel ...')
-        #self.client.purge_everything()
-        #self.client.purge_results("all")
-        #self.client.purge_local_results("all")
-        self.client.results.clear()
-        self.client.metadata.clear()
-        self.client._futures.clear()
-        self.client._output_futures.clear()
-
-        self.client.purge_hub_results("all")
-        self.client.history = []
-        self.client.session.digest_history.clear()
-
-        self.engines.results.clear()
-        self.scheduler.results.clear()
-        #self.client.results.clear()
-        #self.client.metadata.clear()
 
     def ind_es_step(self, iteration):
         tasks = [o.start_step() for o in self.optimizers.values()]

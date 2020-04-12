@@ -24,16 +24,12 @@ from poet_distributed.poet_algo import MultiESOptimizer
 
 def run_main(args):
 
-    client = None
-    engines = None
-    scheduler = None
     initialize_master_fiber()
 
     #set master_seed
     np.random.seed(args.master_seed)
 
-    optimizer_zoo = MultiESOptimizer(args=args, engines=engines, scheduler=scheduler,
-                                     client=client)
+    optimizer_zoo = MultiESOptimizer(args=args)
 
     optimizer_zoo.optimize(iterations=args.n_iterations,
                        propose_with_adam=args.propose_with_adam,

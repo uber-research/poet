@@ -115,8 +115,6 @@ def run_po_batch_fiber(iteration, optim_id, batch_size, rs_seed, noise_std):
 
 class ESOptimizer:
     def __init__(self,
-                 engines,
-                 scheduler,
                  fiber_pool,
                  fiber_shared,
                  theta,
@@ -146,10 +144,7 @@ class ESOptimizer:
         self.fiber_shared = fiber_shared
 
         self.optim_id = optim_id
-        self.engines = engines
         assert self.fiber_pool is not None
-
-        self.scheduler = scheduler
 
         self.theta = theta
         #print(self.theta)
