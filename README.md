@@ -1,4 +1,4 @@
-# POET
+# POET and Enhanced POET
 
 This repo contains implementation of the POET and Enhanced POET algorithms described in:
 
