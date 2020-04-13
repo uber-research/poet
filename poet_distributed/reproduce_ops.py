@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Uber Technologies, Inc.
+# Copyright (c) 2020 Uber Technologies, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 
 from poet_distributed.niches.box2d.env import Env_config
 import numpy as np
+import uuid
 
 
 def name_env_config(ground_roughness,
@@ -73,7 +74,7 @@ class Reproducer:
         return arr
 
 
-    def mutate(self, parent):
+    def mutate(self, parent, no_mutate=False):
 
         ground_roughness=parent.ground_roughness
         pit_gap = list(parent.pit_gap)
@@ -84,50 +85,53 @@ class Reproducer:
         stair_width=list(parent.stair_width)
         stair_steps=list(parent.stair_steps)
 
-        if 'roughness' in self.categories:
-            ground_roughness = np.round(ground_roughness + self.rs.uniform(-0.6, 0.6), 1)
-            max_roughness = 10.0
-            if ground_roughness > max_roughness:
-                ground_roughness = max_roughness
+        if no_mutate:
+            child_name = str(uuid.uuid4())
+        else:
+            if 'roughness' in self.categories:
+                ground_roughness = np.round(ground_roughness + self.rs.uniform(-0.6, 0.6), 1)
+                max_roughness = 10.0
+                if ground_roughness > max_roughness:
+                    ground_roughness = max_roughness
 
-            if ground_roughness <= 0.0:
-                ground_roughness = 0.0
+                if ground_roughness <= 0.0:
+                    ground_roughness = 0.0
 
-        if 'pit' in self.categories:
-            pit_gap = self.populate_array(pit_gap, [0, 0.8],
-                                          increment=0.4, max_value=[8.0, 8.0])
+            if 'pit' in self.categories:
+                pit_gap = self.populate_array(pit_gap, [0, 0.8],
+                                            increment=0.4, max_value=[8.0, 8.0])
 
-        if 'stump' in self.categories:
-            sub_category = '_h'
-            enforce = (len(stump_width) == 0)
+            if 'stump' in self.categories:
+                sub_category = '_h'
+                enforce = (len(stump_width) == 0)
 
-            if enforce or sub_category == '_w':
-                stump_width = self.populate_array(stump_width, [1, 2], enforce=enforce)
+                if enforce or sub_category == '_w':
+                    stump_width = self.populate_array(stump_width, [1, 2], enforce=enforce)
 
-            if enforce or sub_category == '_h':
-                stump_height = self.populate_array(stump_height, [0, 0.4],
-                                                   increment=0.2, enforce=enforce, max_value=[5.0, 5.0])
+                if enforce or sub_category == '_h':
+                    stump_height = self.populate_array(stump_height, [0, 0.4],
+                                                    increment=0.2, enforce=enforce, max_value=[5.0, 5.0])
 
-            stump_float = self.populate_array(stump_float, [0, 1], enforce=True)
+                stump_float = self.populate_array(stump_float, [0, 1], enforce=True)
 
-        if 'stair' in self.categories:
-            sub_category = '_h' #self.rs.choice(['_s', '_h'])
-            enforce = (len(stair_steps) == 0)
+            if 'stair' in self.categories:
+                sub_category = '_h' #self.rs.choice(['_s', '_h'])
+                enforce = (len(stair_steps) == 0)
 
-            if enforce or sub_category == '_s':
-                stair_steps = self.populate_array(stair_steps, [1, 2], interval=1, increment=1, enforce=enforce, max_value=[9, 9])
-                stair_steps = [int(i) for i in stair_steps]
+                if enforce or sub_category == '_s':
+                    stair_steps = self.populate_array(stair_steps, [1, 2], interval=1, increment=1, enforce=enforce, max_value=[9, 9])
+                    stair_steps = [int(i) for i in stair_steps]
 
-            if enforce or sub_category == '_h':
-                stair_height = self.populate_array(stair_height, [0, 0.4],
-                                                   increment=0.2, enforce=enforce, max_value=[5.0, 5.0])
+                if enforce or sub_category == '_h':
+                    stair_height = self.populate_array(stair_height, [0, 0.4],
+                                                    increment=0.2, enforce=enforce, max_value=[5.0, 5.0])
 
-            stair_width = self.populate_array(stump_width, [4, 5], enforce=True)
+                stair_width = self.populate_array(stump_width, [4, 5], enforce=True)
 
-        child_name = name_env_config(ground_roughness,
-                                     pit_gap,
-                                     stump_width, stump_height, stump_float,
-                                     stair_width, stair_height, stair_steps)
+            child_name = name_env_config(ground_roughness,
+                                        pit_gap,
+                                        stump_width, stump_height, stump_float,
+                                        stair_width, stair_height, stair_steps)
 
         child = Env_config(
             name=child_name,

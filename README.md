@@ -1,14 +1,17 @@
 # POET
 
-This repo contains implementation of the POET algorithm described in:
+This repo contains implementation of the POET and Enhanced POET algorithms described in:
 
 [Paired Open-Ended Trailblazer (POET): Endlessly Generating Increasingly Complex and Diverse Learning Environments and Their Solutions](https://arxiv.org/abs/1901.01753)
+
+[Enhanced POET: Open-Ended Reinforcement Learning through Unbounded Invention of Learning Challenges and their Solutions](https://arxiv.org/abs/2003.08536)
 
 An article on Uber Engineering Blog describing POET can be found [here](https://eng.uber.com/poet-open-ended-deep-learning/).
 
 ## Requirements
 
 - [Fiber](https://uber.github.io/fiber/)
+- [NEAT-Python](https://neat-python.readthedocs.io/en/latest/installation.html)
 - [OpenAI Gym](https://github.com/openai/gym)
 
 ## Run the code locally

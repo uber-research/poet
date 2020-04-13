@@ -1,6 +1,6 @@
 # The following code is modified from hardmaru/estool (https://github.com/hardmaru/estool/) under the MIT License.
 
-# Modifications Copyright (c) 2019 Uber Technologies, Inc.
+# Modifications Copyright (c) 2020 Uber Technologies, Inc.
 
 
 import numpy as np
@@ -168,7 +168,7 @@ class Model:
         return np.random.randn(self.param_count) * stdev
 
 def simulate(model, seed, train_mode=False, render_mode=False, num_episode=5,
-             max_len=-1, env_config_this_sim=None):
+             max_len=-1, env_config_this_sim=None, env_params=None):
     reward_list = []
     t_list = []
 
@@ -186,6 +186,9 @@ def simulate(model, seed, train_mode=False, render_mode=False, num_episode=5,
 
     if env_config_this_sim:
         model.env.set_env_config(env_config_this_sim)
+
+    if env_params:
+        model.env.augment(env_params)
 
     for _ in range(num_episode):
 

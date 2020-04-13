@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Uber Technologies, Inc.
+# Copyright (c) 2020 Uber Technologies, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -230,6 +230,9 @@ class ESOptimizer:
 
         self.best_score = None
         self.best_theta = None
+        self.recent_scores = []
+        self.transfer_target = None
+        self.pata_ec = None
 
         self.iteration = 0
 
@@ -296,10 +299,13 @@ class ESOptimizer:
         else:
             self.log_data[eval_key] += '_' + source_optim_id + '_' + str(stats.eval_returns_mean)
 
-        if stats.eval_returns_mean > self.proposal:
-            self.proposal = stats.eval_returns_mean
-            self.proposal_source = source_optim_id + ('' if keyword=='theta' else "_proposal")
-            self.proposal_theta = np.array(source_optim_theta)
+        if keyword == 'proposal' and stats.eval_returns_mean > self.transfer_target:
+            if  stats.eval_returns_mean > self.proposal:
+                self.proposal = stats.eval_returns_mean
+                self.proposal_source = source_optim_id + ('' if keyword=='theta' else "_proposal")
+                self.proposal_theta = np.array(source_optim_theta)
+
+        return stats.eval_returns_mean > self.transfer_target
 
     def update_dicts_after_es(self, stats, self_eval_stats):
 
@@ -320,6 +326,12 @@ class ESOptimizer:
         if self.best_score is None or self.best_score < self.self_evals:
             self.best_score = self.self_evals
             self.best_theta = np.array(self.theta)
+
+        assert len(self.recent_scores) <= 5
+        if len(self.recent_scores) == 5:
+            self.recent_scores.pop(0)
+        self.recent_scores.append(self.self_evals)
+        self.transfer_target = max(self.recent_scores)
 
         self.log_data.update({
             'po_returns_mean_{}'.format(self.optim_id):
@@ -571,8 +583,25 @@ class ESOptimizer:
         self_eval_stats = self.get_theta_eval(self_eval_task)
         return self_eval_stats.eval_returns_mean
 
+    def update_pata_ec(self, archived_optimizers, optimizers, lower_bound, upper_bound):
+        def cap_score(score, lower, upper):
+            if score < lower:
+                score = lower
+            elif score > upper:
+                score = upper
 
-    def evaluate_transfer(self, optimizers, propose_with_adam=False):
+            return score
+
+        raw_scores = []
+        for source_optim in archived_optimizers.values():
+            raw_scores.append(cap_score(self.evaluate_theta(source_optim.theta)))
+
+        for source_optim in optimizers.values():
+            raw_scores.append(cap_score(self.evaluate_theta(source_optim.theta)))
+
+        self.pata_ec = compute_centered_ranks(np.array(raw_scores))
+
+    def evaluate_transfer(self, optimizers, evaluate_proposal=True, propose_with_adam=False):
 
         best_init_score = None
         best_init_theta = None
@@ -583,12 +612,13 @@ class ESOptimizer:
                 best_init_score = score
                 best_init_theta = np.array(source_optim.theta)
 
-            task = self.start_step(source_optim.theta)
-            proposed_theta, _ = self.get_step(
-                task, propose_with_adam=propose_with_adam, propose_only=True)
-            score = self.evaluate_theta(proposed_theta)
-            if score > best_init_score:
-                best_init_score = score
-                best_init_theta = np.array(proposed_theta)
+            if evaluate_proposal:
+                task = self.start_step(source_optim.theta)
+                proposed_theta, _ = self.get_step(
+                    task, propose_with_adam=propose_with_adam, propose_only=True)
+                score = self.evaluate_theta(proposed_theta)
+                if score > best_init_score:
+                    best_init_score = score
+                    best_init_theta = np.array(proposed_theta)
 
         return best_init_score, best_init_theta

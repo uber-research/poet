@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Uber Technologies, Inc.
+# Copyright (c) 2020 Uber Technologies, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,13 +30,14 @@ DEFAULT_ENV = Env_config(
         stair_steps=[])
 
 class Box2DNiche(Niche):
-    def __init__(self, env_configs, seed, init='random', stochastic=False):
+    def __init__(self, env_configs, env_params, seed, init='random', stochastic=False):
         self.model = Model(bipedhard_custom)
         if not isinstance(env_configs, list):
             env_configs = [env_configs]
         self.env_configs = OrderedDict()
         for env in env_configs:
             self.env_configs[env.name] = env
+        self.env_params = env_params
         self.seed = seed
         self.stochastic = stochastic
         self.model.make_env(seed=seed, env_config=DEFAULT_ENV)
@@ -44,6 +45,7 @@ class Box2DNiche(Niche):
 
     def __getstate__(self):
         return {"env_configs": self.env_configs,
+                "env_params": self.env_params,
                 "seed": self.seed,
                 "stochastic": self.stochastic,
                 "init": self.init,
@@ -52,6 +54,7 @@ class Box2DNiche(Niche):
     def __setstate__(self, state):
         self.model = Model(bipedhard_custom)
         self.env_configs = state["env_configs"]
+        self.env_params = state["env_params"]
         self.seed = state["seed"]
         self.stochastic = state["stochastic"]
         self.model.make_env(seed=self.seed, env_config=DEFAULT_ENV)
@@ -87,7 +90,7 @@ class Box2DNiche(Niche):
             seed = self.seed
         for env_config in self.env_configs.values():
             returns, lengths = simulate(
-                self.model, seed=seed, train_mode=not eval, num_episode=1, env_config_this_sim=env_config)
+                self.model, seed=seed, train_mode=not eval, num_episode=1, env_config_this_sim=env_config, env_params=self.env_params)
             total_returns += returns[0]
             total_length += lengths[0]
         return total_returns / len(self.env_configs), total_length

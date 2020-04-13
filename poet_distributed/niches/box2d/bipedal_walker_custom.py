@@ -1,6 +1,6 @@
 # The following code is modified from openai/gym (https://github.com/openai/gym) under the MIT License.
 
-# Modifications Copyright (c) 2019 Uber Technologies, Inc.
+# Modifications Copyright (c) 2020 Uber Technologies, Inc.
 
 
 import sys
@@ -133,6 +133,7 @@ class BipedalWalkerCustom(gym.Env):
     def __init__(self, env_config):
         self.spec = None
         self.set_env_config(env_config)
+        self.env_params = None
         self.env_seed = None
         self._seed()
         self.viewer = None
@@ -165,6 +166,9 @@ class BipedalWalkerCustom(gym.Env):
 
     def set_env_config(self, env_config):
         self.config = env_config
+
+    def augment(self, params):
+        self.env_params = params
 
     def _set_terrain_number(self):
         self.hardcore = False
@@ -236,11 +240,21 @@ class BipedalWalkerCustom(gym.Env):
 
             if state == self.GRASS and not oneshot:
                 velocity = 0.8 * velocity + 0.01 * np.sign(TERRAIN_HEIGHT - y)
-                if i > TERRAIN_STARTPAD:
-                    velocity += self.np_random.uniform(-1, 1) / SCALE  # 1
-                # input parameter: ground_roughness
-                #ground_roughness = 1
-                y += self.config.ground_roughness * velocity
+                if self.env_params is not None and self.env_params.altitude_fn is not None:
+                    y += velocity
+                    if i > TERRAIN_STARTPAD:
+                        mid = TERRAIN_LENGTH * TERRAIN_STEP / 2.
+                        x_ = (x - mid) * np.pi / mid
+                        y = TERRAIN_HEIGHT + self.env_params.altitude_fn((x_, ))[0]
+                        if i == TERRAIN_STARTPAD+1:
+                            y_norm = self.env_params.altitude_fn((x_, ))[0]
+                        y -= y_norm
+                else:
+                    if i > TERRAIN_STARTPAD:
+                        velocity += self.np_random.uniform(-1, 1) / SCALE  # 1
+                    # input parameter: ground_roughness
+                    #ground_roughness = 1
+                    y += self.config.ground_roughness * velocity
 
             elif state == self.PIT and oneshot:
                 # input parameter: pit_gap

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Uber Technologies, Inc.
+# Copyright (c) 2020 Uber Technologies, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,30 +15,7 @@
 
 import numpy as np
 
-def env2array(env):
-    arr = [0., 0., 0., 0., 0.]
-    arr[0] = env.ground_roughness
-    if len(env.pit_gap) > 0:
-        arr[1] = env.pit_gap[0]
-        arr[2] = env.pit_gap[1]
-    if len(env.stump_height) > 0:
-        arr[3] = env.stump_height[0]
-        arr[4] = env.stump_height[1]
-
-    return arr
-
-def euclidean_distance(nx, ny, normalize=False):
-
-    x = np.array(env2array(nx))
-    y = np.array(env2array(ny))
-
-    x = x.astype(float)
-    y = y.astype(float)
-
-    if normalize:
-        norm = np.array([8., 8., 8., 3., 3.])
-        x /= norm
-        y /= norm
+def euclidean_distance(x, y):
 
     n, m = len(x), len(y)
     if n > m:
@@ -49,11 +26,16 @@ def euclidean_distance(nx, ny, normalize=False):
         b = np.linalg.norm(x[-1] - y[n:])
     return np.sqrt(a**2 + b**2)
 
-def compute_novelty_vs_archive(archive, niche, k):
+
+def compute_novelty_vs_archive(archived_optimizers, optimizers, niche, k, low, high):
     distances = []
-    normalize = False
-    for point in archive.values():
-        distances.append(euclidean_distance(point, niche, normalize=normalize))
+    niche.update_pata_ec(archived_optimizers, optimizers, low, high)
+    for point in archived_optimizers.values():
+        distances.append(euclidean_distance(point.pata_ec, niche.pata_ec))
+
+    for point in optimizers.values():
+        distances.append(euclidean_distance(point.pata_ec, niche.pata_ec))
+
 
     # Pick k nearest neighbors
     distances = np.array(distances)
