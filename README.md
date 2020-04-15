@@ -14,12 +14,16 @@ An article on Uber Engineering Blog describing POET can be found [here](https://
 - [NEAT-Python](https://neat-python.readthedocs.io/en/latest/installation.html)
 - [OpenAI Gym](https://github.com/openai/gym)
 
-## Run the code locally
+## Run Enhanced POET locally
 
 To run locally on a multicore machine
 
 ```./run_poet_local.sh final_test```
 
-## Run the code on a computer cluster
+## Run Enhanced POET on a computer cluster
 
 To containerize and run the code on a computer cluster (e.g., Google Kubernetes Engine on Google Cloud), please refer to [Fiber Documentation](https://uber.github.io/fiber/getting-started/#containerize-your-program).
+
+## Run original POET
+
+Use this [legacy branch](https://github.com/uber-research/poet/tree/original_poet)
