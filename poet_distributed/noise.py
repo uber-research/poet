@@ -2,7 +2,7 @@
 # (https://github.com/openai/evolution-strategies-starter)
 # under the MIT License.
 
-# Modifications Copyright (c) 2019 Uber Technologies, Inc.
+# Modifications Copyright (c) 2020 Uber Technologies, Inc.
 
 
 import numpy as np

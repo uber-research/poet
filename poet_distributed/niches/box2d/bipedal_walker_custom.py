@@ -1,6 +1,6 @@
 # The following code is modified from openai/gym (https://github.com/openai/gym) under the MIT License.
 
-# Modifications Copyright (c) 2019 Uber Technologies, Inc.
+# Modifications Copyright (c) 2020 Uber Technologies, Inc.
 
 
 import sys

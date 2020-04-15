@@ -1,6 +1,6 @@
 # The following code is modified from hardmaru/estool (https://github.com/hardmaru/estool/) under the MIT License.
 
-# Modifications Copyright (c) 2019 Uber Technologies, Inc.
+# Modifications Copyright (c) 2020 Uber Technologies, Inc.
 
 
 from collections import namedtuple
