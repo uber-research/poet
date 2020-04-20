@@ -31,6 +31,7 @@ Then run the following command:
 To get the training logs:
 
 ```fiber cp nfs:/persistent/logs/final_test .```
+```fiber cp nfs:/persistent/logs/poet_final_test poet_final_test```
 
 ## Run Enhanced POET on a computer cluster
 
