@@ -20,6 +20,18 @@ To run locally on a multicore machine
 
 ```./run_poet_local.sh final_test```
 
+## Run Enhanced POET on a Kubernetes cluster
+
+Follow instructions [here](https://uber.github.io/fiber/advanced/#working-with-persistent-storage) to create a persistent volume.
+
+Then run the following command:
+
+```./run_poet_remote.sh final_test```
+
+To get the training logs:
+
+```fiber cp nfs:/persistent/logs/final_test .```
+
 ## Run Enhanced POET on a computer cluster
 
 To containerize and run the code on a computer cluster (e.g., Google Kubernetes Engine on Google Cloud), please refer to [Fiber Documentation](https://uber.github.io/fiber/getting-started/#containerize-your-program).
