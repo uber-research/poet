@@ -358,6 +358,7 @@ class MultiESOptimizer:
                                     max_num_envs=self.args.max_num_envs)
 
             for o in self.optimizers.values():
+                print('value O：',o)
                 o.clean_dicts_before_iter()
 
             self.ind_es_step(iteration=iteration)
