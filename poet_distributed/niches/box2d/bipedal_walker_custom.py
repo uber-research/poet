@@ -181,6 +181,7 @@ class FlechetteCustom(gym.Env):
         else:
             reward = - resultat_distance/self.config.radius
         done = True
+        print('Get a note:',reward)
         return np.array(state), reward, done, {"Hit": hit}
 
 # class BipedalWalkerCustom(gym.Env):
