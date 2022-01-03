@@ -15,6 +15,7 @@
 
 from .logger import CSVLogger
 import logging
+
 logger = logging.getLogger(__name__)
 import numpy as np
 from poet_distributed.es import ESOptimizer
@@ -31,9 +32,9 @@ def construct_niche_fns_from_env(args, env, seed):
         def make_niche():
             from poet_distributed.niches import Box2DNiche
             return Box2DNiche(env_configs=configs,
-                            seed=seed,
-                            init=args.init,
-                            stochastic=args.stochastic)
+                              seed=seed,
+                              init=args.init,
+                              stochastic=args.stochastic)
 
         return make_niche
 
@@ -54,12 +55,12 @@ class MultiESOptimizer:
         manager = mp_ctx.Manager()
         self.manager = manager
         self.fiber_shared = {
-                "niches": manager.dict(),
-                "thetas": manager.dict(),
+            "niches": manager.dict(),
+            "thetas": manager.dict(),
         }
         self.fiber_pool = mp_ctx.Pool(args.num_workers, initializer=initialize_worker_fiber,
-                initargs=(self.fiber_shared["thetas"],
-                    self.fiber_shared["niches"]))
+                                      initargs=(self.fiber_shared["thetas"],
+                                                self.fiber_shared["niches"]))
 
         self.env_registry = OrderedDict()
         self.env_archive = OrderedDict()
@@ -77,7 +78,7 @@ class MultiESOptimizer:
 
             path = start_from_config['path']
             exp_name = start_from_config['exp_name']
-            prefix = path + exp_name +'/'+exp_name+'.'
+            prefix = path + exp_name + '/' + exp_name + '.'
             for niche_name, niche_file in sorted(start_from_config['niches'].items()):
                 logger.debug(niche_name)
                 niche_file_complete = prefix + niche_file
@@ -99,15 +100,11 @@ class MultiESOptimizer:
 
         else:
             env = Env_config(
-                name='flat',
-                ground_roughness=0,
-                pit_gap=[],
-                stump_width=[],
-                stump_height=[],
-                stump_float=[],
-                stair_height=[],
-                stair_width=[],
-                stair_steps=[])
+                name='tablette',
+                init_height=1,
+                init_speed=1,
+                distance=1,
+                radius=1)
 
             self.add_optimizer(env=env, seed=args.master_seed)
 
@@ -121,7 +118,7 @@ class MultiESOptimizer:
         if model_params is not None:
             theta = np.array(model_params)
         else:
-            theta=niche.initial_theta()
+            theta = niche.initial_theta()
         assert optim_id not in self.optimizers.keys()
 
         return ESOptimizer(
@@ -147,7 +144,6 @@ class MultiESOptimizer:
             created_at=created_at,
             is_candidate=is_candidate)
 
-
     def add_optimizer(self, env, seed, created_at=0, model_params=None):
         '''
             creat a new optimizer/niche
@@ -161,16 +157,16 @@ class MultiESOptimizer:
         assert optim_id not in self.env_archive.keys()
         self.env_registry[optim_id] = env
         self.env_archive[optim_id] = env
-        #dump the env
+        # dump the env
         log_file = self.args.log_file
         env_config_file = log_file + '/' + log_file.split('/')[-1] + '.' + optim_id + '.env.json'
         record = {'config': env._asdict(), 'seed': seed}
-        with open(env_config_file,'w') as f:
+        with open(env_config_file, 'w') as f:
             json.dump(record, f)
 
     def delete_optimizer(self, optim_id):
         assert optim_id in self.optimizers.keys()
-        #assume optim_id == env_id for single_env niches
+        # assume optim_id == env_id for single_env niches
         o = self.optimizers.pop(optim_id)
         del o
         assert optim_id in self.env_registry.keys()
@@ -181,7 +177,6 @@ class MultiESOptimizer:
         tasks = [o.start_step() for o in self.optimizers.values()]
 
         for optimizer, task in zip(self.optimizers.values(), tasks):
-
             optimizer.theta, stats = optimizer.get_step(task)
             self_eval_task = optimizer.start_theta_eval(optimizer.theta)
             self_eval_stats = optimizer.get_theta_eval(self_eval_task)
@@ -191,14 +186,14 @@ class MultiESOptimizer:
                 stats.po_returns_max, iteration - optimizer.created_at))
 
             optimizer.update_dicts_after_es(stats=stats,
-                self_eval_stats=self_eval_stats)
+                                            self_eval_stats=self_eval_stats)
 
     def transfer(self, propose_with_adam, checkpointing, reset_optimizer):
         logger.info('Computing direct transfers...')
         for source_optim in self.optimizers.values():
             source_tasks = []
             for target_optim in [o for o in self.optimizers.values()
-                                    if o is not source_optim]:
+                                 if o is not source_optim]:
                 task = target_optim.start_theta_eval(
                     source_optim.theta)
                 source_tasks.append((task, target_optim))
@@ -207,14 +202,14 @@ class MultiESOptimizer:
                 stats = target_optim.get_theta_eval(task)
 
                 target_optim.update_dicts_after_transfer(source_optim_id=source_optim.optim_id,
-                    source_optim_theta=source_optim.theta,
-                    stats=stats, keyword='theta')
+                                                         source_optim_theta=source_optim.theta,
+                                                         stats=stats, keyword='theta')
 
         logger.info('Computing proposal transfers...')
         for source_optim in self.optimizers.values():
             source_tasks = []
             for target_optim in [o for o in self.optimizers.values()
-                                    if o is not source_optim]:
+                                 if o is not source_optim]:
                 task = target_optim.start_step(source_optim.theta)
                 source_tasks.append((task, target_optim))
 
@@ -226,8 +221,8 @@ class MultiESOptimizer:
                 proposal_eval_stats = target_optim.get_theta_eval(proposal_eval_task)
 
                 target_optim.update_dicts_after_transfer(source_optim_id=source_optim.optim_id,
-                    source_optim_theta=proposed_theta,
-                    stats=proposal_eval_stats, keyword='proposal')
+                                                         source_optim_theta=proposed_theta,
+                                                         stats=proposal_eval_stats, keyword='proposal')
 
         logger.info('Considering transfers...')
         for o in self.optimizers.values():
@@ -252,7 +247,6 @@ class MultiESOptimizer:
         logger.debug(delete_candidates)
 
         return repro_candidates, delete_candidates
-
 
     def pass_dedup(self, env_config):
         if env_config.name in self.env_registry.keys():
@@ -300,8 +294,8 @@ class MultiESOptimizer:
                     logger.debug("{} passed mc, novelty score {}".format(score, novelty_score))
                     child_list.append((new_env_config, seed, parent_optim_id, novelty_score))
 
-        #sort child list according to novelty for high to low
-        child_list = sorted(child_list,key=lambda x: x[3], reverse=True)
+        # sort child list according to novelty for high to low
+        child_list = sorted(child_list, key=lambda x: x[3], reverse=True)
         return child_list
 
     def adjust_envs_niches(self, iteration, steps_before_adjust, max_num_envs=None, max_children=8, max_admitted=1):
@@ -322,7 +316,7 @@ class MultiESOptimizer:
             if child_list == None or len(child_list) == 0:
                 logger.info("mutation to reproduce env FAILED!!!")
                 return
-            #print(child_list)
+            # print(child_list)
             admitted = 0
             for child in child_list:
                 new_env_config, seed, _, _ = child
@@ -331,7 +325,8 @@ class MultiESOptimizer:
                 score_child, theta_child = o.evaluate_transfer(self.optimizers)
                 del o
                 if self.pass_mc(score_child):  # check mc
-                    self.add_optimizer(env=new_env_config, seed=seed, created_at=iteration, model_params=np.array(theta_child))
+                    self.add_optimizer(env=new_env_config, seed=seed, created_at=iteration,
+                                       model_params=np.array(theta_child))
                     admitted += 1
                     if admitted >= max_admitted:
                         break
