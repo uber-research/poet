@@ -129,6 +129,8 @@ class FlechetteCustom(gym.Env):
         pass
     def reset(self):
         pass
+    def _reset(self):
+        self.reset()
     def __repr__(self):
         return "{}\nenv\n{}".format(self.__dict__, self.__dict__["np_random"].get_state())
 
