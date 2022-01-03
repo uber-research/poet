@@ -9,7 +9,7 @@ from .bipedal_walker_custom import FlechetteCustom, Env_config  # noqa
 
 
 def make_env(env_name, seed, render_mode=False, env_config=None):
-    if env_name.startswith("BipedalWalkerCustom"):
+    if env_name.startswith("Flechette"):
         assert env_config is not None
         env = FlechetteCustom(env_config)
     else:
