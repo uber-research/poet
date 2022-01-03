@@ -353,7 +353,7 @@ class MultiESOptimizer:
                  reset_optimizer=True):
 
         for iteration in range(iterations):
-
+            print('Iteration:',iteration)
             self.adjust_envs_niches(iteration, self.args.adjust_interval * steps_before_transfer,
                                     max_num_envs=self.args.max_num_envs)
 
