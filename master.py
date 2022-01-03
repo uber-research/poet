@@ -30,7 +30,7 @@ def run_main(args):
     np.random.seed(args.master_seed)
 
     optimizer_zoo = MultiESOptimizer(args=args)
-
+    print('Start to optimize')
     optimizer_zoo.optimize(iterations=args.n_iterations,
                        propose_with_adam=args.propose_with_adam,
                        reset_optimizer=True,
