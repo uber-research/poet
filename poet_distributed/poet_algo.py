@@ -30,8 +30,8 @@ import json
 def construct_niche_fns_from_env(args, env, seed):
     def niche_wrapper(configs, seed):  # force python to make a new lexical scope
         def make_niche():
-            from poet_distributed.niches import Box2DNiche
-            return Box2DNiche(env_configs=configs,
+            from poet_distributed.niches import Flechette
+            return Flechette(env_configs=configs,
                               seed=seed,
                               init=args.init,
                               stochastic=args.stochastic)
