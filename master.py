@@ -58,7 +58,7 @@ def main():
     parser.add_argument('--master_seed', type=int, default=111)
     parser.add_argument('--mc_lower', type=int, default=25)
     parser.add_argument('--mc_upper', type=int, default=340)
-    parser.add_argument('--repro_threshold', type=int, default=200)
+    parser.add_argument('--repro_threshold', type=int, default=0.3)
     parser.add_argument('--max_num_envs', type=int, default=100)
     parser.add_argument('--normalize_grads_by_noise_std', action='store_true', default=False)
     parser.add_argument('--propose_with_adam', action='store_true', default=False)
