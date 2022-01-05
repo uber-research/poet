@@ -30,6 +30,6 @@ python -u master.py \
   --max_num_envs=25 \
   --adjust_interval=8 \
   --propose_with_adam \
-  --steps_before_transfer=5 \
+  --steps_before_transfer=20 \
   --num_workers 1 \
   --n_iterations=50000 2>&1 | tee ~/ipp/$experiment/run.log
