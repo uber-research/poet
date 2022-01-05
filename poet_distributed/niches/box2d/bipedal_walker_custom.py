@@ -163,6 +163,7 @@ class FlechetteCustom(gym.Env):
         return self._step(action)
 
     def _step(self, action):
+        print(action)
         #Action[speed_x, speed_y]
         #self.config[name='default_env',init_height = 0,init_speed = 0,distance = min_dist,radius = 1]
         hit = False
@@ -629,7 +630,8 @@ class FlechetteCustom(gym.Env):
 
     def render(self, *args, **kwargs):
         return self._render(*args, **kwargs)
-
+    def _render(self, mode='human', close=False):
+        pass
     # def _render(self, mode='human', close=False):
     #     if close:
     #         if self.viewer is not None:
