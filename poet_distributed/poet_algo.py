@@ -179,8 +179,11 @@ class MultiESOptimizer:
         for optimizer, task in zip(self.optimizers.values(), tasks):
             print('in for 1')
             optimizer.theta, stats = optimizer.get_step(task)
+            print('in for 2')
             self_eval_task = optimizer.start_theta_eval(optimizer.theta)
+            print('in for 3')
             self_eval_stats = optimizer.get_theta_eval(self_eval_task)
+            print('in for 4')
 
             logger.info('Iter={} Optimizer {} theta_mean {} best po {} iteration spent {}'.format(
                 iteration, optimizer.optim_id, self_eval_stats.eval_returns_mean,
