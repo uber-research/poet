@@ -10,7 +10,7 @@ DEFAULT_ENV = Env_config(
         name='default_env',
         init_height = 0,
         init_speed = 0,
-        distance = 10,
+        distance = 1,
         radius = 1
         )
 

@@ -238,6 +238,7 @@ class MultiESOptimizer:
             o = self.optimizers[optim_id]
             logger.info("niche {} created at {} start_score {} current_self_evals {}".format(
                 optim_id, o.created_at, o.start_score, o.self_evals))
+            print('self_evals',o.self_evals)
             if o.self_evals >= self.args.repro_threshold:
                 repro_candidates.append(optim_id)
 
@@ -299,8 +300,8 @@ class MultiESOptimizer:
         return child_list
 
     def adjust_envs_niches(self, iteration, steps_before_adjust, max_num_envs=None, max_children=8, max_admitted=1):
-
         if iteration > 0 and iteration % steps_before_adjust == 0:
+            print('adjust_envs_niches\n\n\n\n\n')
             list_repro, list_delete = self.check_optimizer_status(iteration)
 
             if len(list_repro) == 0:
