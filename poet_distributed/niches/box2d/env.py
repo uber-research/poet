@@ -17,8 +17,16 @@ def make_env(env_name, seed, render_mode=False, env_config=None):
         raise Exception('Got env_name {}'.format(env_name))
     if render_mode and not env_name.startswith("Roboschool"):
         env.render("human")
-    if seed >= 0:
+    if (seed >= 0):
         env.seed(seed)
+
+    # print("environment details")
+    # print("env.action_space", env.action_space)
+    # print("high, low", env.action_space.high, env.action_space.low)
+    # print("environment details")
+    # print("env.observation_space", env.observation_space)
+    # print("high, low", env.observation_space.high, env.observation_space.low)
+    # assert False
 
     return env
 

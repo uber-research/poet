@@ -115,8 +115,8 @@ def run_po_batch_fiber(iteration, optim_id, batch_size, rs_seed, noise_std):
 
 class ESOptimizer:
     def __init__(self,
-                 # fiber_pool,
-                 # fiber_shared,
+                 fiber_pool,
+                 fiber_shared,
                  theta,
                  make_niche,
                  learning_rate,
@@ -140,11 +140,11 @@ class ESOptimizer:
         from .optimizers import Adam, SimpleSGD
 
         logger.debug('Creating optimizer {}...'.format(optim_id))
-        # self.fiber_pool = fiber_pool
-        # self.fiber_shared = fiber_shared
+        self.fiber_pool = fiber_pool
+        self.fiber_shared = fiber_shared
 
         self.optim_id = optim_id
-        # assert self.fiber_pool is not None
+        assert self.fiber_pool is not None
 
         self.theta = theta
         #print(self.theta)
@@ -157,9 +157,9 @@ class ESOptimizer:
         self.noise_decay = noise_decay
         self.noise_limit = noise_limit
 
-        # self.fiber_shared = fiber_shared
-        # niches = fiber_shared["niches"]
-        # niches[optim_id] = make_niche()
+        self.fiber_shared = fiber_shared
+        niches = fiber_shared["niches"]
+        niches[optim_id] = make_niche()
 
         self.batches_per_chunk = batches_per_chunk
         self.batch_size = batch_size
