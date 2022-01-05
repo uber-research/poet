@@ -175,8 +175,9 @@ class MultiESOptimizer:
 
     def ind_es_step(self, iteration):
         tasks = [o.start_step() for o in self.optimizers.values()]
-
+        print('in indesstep,for')
         for optimizer, task in zip(self.optimizers.values(), tasks):
+            print('in for 1')
             optimizer.theta, stats = optimizer.get_step(task)
             self_eval_task = optimizer.start_theta_eval(optimizer.theta)
             self_eval_stats = optimizer.get_theta_eval(self_eval_task)
@@ -186,7 +187,9 @@ class MultiESOptimizer:
                 stats.po_returns_max, iteration - optimizer.created_at))
 
             optimizer.update_dicts_after_es(stats=stats,
-                                            self_eval_stats=self_eval_stats)
+                                           self_eval_stats=self_eval_stats)
+        print('in indesstep,end for')
+
 
     def transfer(self, propose_with_adam, checkpointing, reset_optimizer):
         logger.info('Computing direct transfers...')
@@ -360,7 +363,7 @@ class MultiESOptimizer:
             for o in self.optimizers.values():
                 print('value O：',o)
                 o.clean_dicts_before_iter()
-
+            print('end for')
             self.ind_es_step(iteration=iteration)
 
             if len(self.optimizers) > 1 and iteration % steps_before_transfer == 0:
