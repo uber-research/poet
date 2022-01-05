@@ -14,6 +14,7 @@ DEFAULT_ENV = Env_config(
         radius = 1
         )
 
+
 class Flechette(Niche):
     def __init__(self, env_configs, seed, init='random', stochastic=False):
         self.model = Model(flechette_custom)
