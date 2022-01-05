@@ -164,6 +164,8 @@ class FlechetteCustom(gym.Env):
 
     def _step(self, action):
         print(action)
+        speed_x = action[0]
+        speed_y = action[1]
         #Action[speed_x, speed_y]
         #self.config[name='default_env',init_height = 0,init_speed = 0,distance = min_dist,radius = 1]
         hit = False
@@ -171,10 +173,10 @@ class FlechetteCustom(gym.Env):
         state = [self.config.init_height,self.config.init_speed,self.config.distance]
         def calcule_distance(v0,a,t):
             return 0.5 * a * t * t + v0 * t
-        time = self.config.distance / action.speed_x
+        time = self.config.distance / speed_x
         G = 10
         h_target = self.config.init_height - calcule_distance(self.config.init_speed,G,time)
-        h_agent =  - calcule_distance(action.speed_y,G,time)
+        h_agent =  - calcule_distance(speed_y,G,time)
         resultat_distance = abs(h_target - h_agent)
         if resultat_distance < self.config.radius:
             hit = True
