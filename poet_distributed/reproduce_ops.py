@@ -26,7 +26,7 @@ class Reproducer:
     def __init__(self, args):
         self.rs = np.random.RandomState(args.master_seed)
         self.categories = list(args.envs)
-
+        print('cate',self.categories)
     def pick(self, arr):
         return self.rs.choice(arr)
 
