@@ -393,7 +393,7 @@ class ESOptimizer:
         logger.debug('Optimizer {} delete env {}...'.format(self.optim_id, env_name))
 
         niches = self.fiber_shared["niches"]
-        niches[optim_id].delete_env(env_name)
+        niches[self.optim_id].delete_env(env_name)
 
     def start_chunk_fiber(self, runner, batches_per_chunk, batch_size, *args):
         logger.debug('Optimizer {} spawning {} batches of size {}'.format(
