@@ -413,12 +413,9 @@ class ESOptimizer:
         return chunk_tasks
 
     def get_chunk(self, tasks):
-        print('get_chunk')
         res = []
         for task in tasks:
-            print('get_chunk for')
             aux = task.get()
-            print('get_chunk for')
             res.append(aux)
         return res
 
