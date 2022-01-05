@@ -49,19 +49,19 @@ class MultiESOptimizer:
 
         self.args = args
 
-        import fiber as mp
+        # import fiber as mp
 
-        mp_ctx = mp.get_context('spawn')
-        manager = mp_ctx.Manager()
-        self.manager = manager
-        self.fiber_shared = {
-            "niches": manager.dict(),
-            "thetas": manager.dict(),
-        }
-        self.fiber_pool = mp_ctx.Pool(args.num_workers, initializer=initialize_worker_fiber,
-                                      initargs=(self.fiber_shared["thetas"],
-                                                self.fiber_shared["niches"]))
-
+        # mp_ctx = mp.get_context('spawn')
+        # manager = mp_ctx.Manager()
+        # self.manager = manager
+        # self.fiber_shared = {
+        #     "niches": manager.dict(),
+        #     "thetas": manager.dict(),
+        # }
+        # self.fiber_pool = mp_ctx.Pool(args.num_workers, initializer=initialize_worker_fiber,
+        #                               initargs=(self.fiber_shared["thetas"],
+        #                                         self.fiber_shared["niches"]))
+        #
         self.env_registry = OrderedDict()
         self.env_archive = OrderedDict()
         self.env_reproducer = Reproducer(args)
@@ -123,8 +123,8 @@ class MultiESOptimizer:
 
         return ESOptimizer(
             optim_id=optim_id,
-            fiber_pool=self.fiber_pool,
-            fiber_shared=self.fiber_shared,
+            # fiber_pool=self.fiber_pool,
+            # fiber_shared=self.fiber_shared,
             theta=theta,
             make_niche=niche_fn,
             learning_rate=self.args.learning_rate,

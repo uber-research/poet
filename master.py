@@ -24,7 +24,7 @@ from poet_distributed.poet_algo import MultiESOptimizer
 
 def run_main(args):
 
-    initialize_master_fiber()
+    # initialize_master_fiber()
 
     #set master_seed
     np.random.seed(args.master_seed)
