@@ -413,7 +413,12 @@ class ESOptimizer:
         return chunk_tasks
 
     def get_chunk(self, tasks):
-        return [task.get() for task in tasks]
+        print('get_chunk')
+        res = []
+        for task in tasks:
+            print('get_chunk for')
+            res.append(task.get())
+        return res
 
     def collect_po_results(self, po_results):
         noise_inds = np.concatenate([r.noise_inds for r in po_results])
