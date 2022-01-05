@@ -163,7 +163,6 @@ class FlechetteCustom(gym.Env):
         return self._step(action)
 
     def _step(self, action):
-        print(action)
         speed_x = action[0]
         speed_y = action[1]
         #Action[speed_x, speed_y]
