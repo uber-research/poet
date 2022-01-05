@@ -25,8 +25,9 @@ def name_env_config(init_height,init_speed,distance,radius):
 class Reproducer:
     def __init__(self, args):
         self.rs = np.random.RandomState(args.master_seed)
-        self.categories = list(args.envs)
-        print('cate',self.categories)
+        # self.categories = list(args.envs)
+        # print('cate',self.categories)
+        self.categories = ['init_height','init_speed','distance','radius']
     def pick(self, arr):
         return self.rs.choice(arr)
 
