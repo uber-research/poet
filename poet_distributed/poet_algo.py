@@ -257,7 +257,7 @@ class MultiESOptimizer:
             return True
 
     def pass_mc(self, score):
-        print('\n\n\n\npass_mc score:',score,self.args.mc_lower)
+        # print('\n\n\n\npass_mc score:',score,self.args.mc_lower)
         if score < self.args.mc_lower or score > self.args.mc_upper:
             return False
         else:
