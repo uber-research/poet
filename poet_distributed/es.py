@@ -159,7 +159,7 @@ class ESOptimizer:
 
         # self.fiber_shared = fiber_shared
         # niches = fiber_shared["niches"]
-        niches[optim_id] = make_niche()
+        # niches[optim_id] = make_niche()
 
         self.batches_per_chunk = batches_per_chunk
         self.batch_size = batch_size
