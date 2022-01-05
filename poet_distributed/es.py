@@ -417,7 +417,9 @@ class ESOptimizer:
         res = []
         for task in tasks:
             print('get_chunk for')
-            res.append(task.get())
+            aux = task.get()
+            print('get_chunk for')
+            res.append(aux)
         return res
 
     def collect_po_results(self, po_results):
