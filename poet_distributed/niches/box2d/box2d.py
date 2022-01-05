@@ -1,6 +1,9 @@
 from .model import Model, simulate
 from .env import flechette_custom, Env_config
 from collections import OrderedDict
+
+from .. import Niche
+
 min_dist = 1
 G = 10
 DEFAULT_ENV = Env_config(
@@ -11,7 +14,7 @@ DEFAULT_ENV = Env_config(
         radius = 1
         )
 
-class Flechette():
+class Flechette(Niche):
     def __init__(self, env_configs, seed, init='random', stochastic=False):
         self.model = Model(flechette_custom)
         if not isinstance(env_configs, list):
