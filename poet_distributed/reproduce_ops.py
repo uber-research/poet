@@ -19,7 +19,9 @@ import numpy as np
 
 def name_env_config(init_height,init_speed,distance,radius):
 
-    env_name = 'r' + str(init_height) + str(init_speed) + str(distance) + str(radius)
+    env_name = 'Tablette_' + str(round(init_height,2))  + '_'+\
+               str(round(init_speed,2)) + '_'+ str(round(distance,2)) \
+               + '_' + str(round(radius,2))
     return env_name
 
 class Reproducer:
