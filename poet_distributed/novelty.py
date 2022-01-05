@@ -25,9 +25,9 @@ def env2array(env):
     #    arr[3] = env.stump_height[0]
     #    arr[4] = env.stump_height[1]
     arr[0] = env.init_height
-    arr[2] = env.init_speed
-    arr[3] = env.distance
-    arr[4] = env.radius
+    arr[1] = env.init_speed
+    arr[2] = env.distance
+    arr[3] = env.radius
 
     return arr
 
