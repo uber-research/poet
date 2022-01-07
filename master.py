@@ -56,7 +56,7 @@ def main():
     parser.add_argument('--n_iterations', type=int, default=200)
     parser.add_argument('--steps_before_transfer', type=int, default=25)
     parser.add_argument('--master_seed', type=int, default=111)
-    parser.add_argument('--mc_lower', type=int, default=-3)
+    parser.add_argument('--mc_lower', type=int, default=-1)
     parser.add_argument('--mc_upper', type=int, default=0.6)
     parser.add_argument('--repro_threshold', type=int, default=0.3)
     parser.add_argument('--max_num_envs', type=int, default=100)
