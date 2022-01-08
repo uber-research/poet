@@ -49,8 +49,8 @@ flechette_custom = Game(env_name='Flechette-v0',
                         input_size=3,#height,distance,speed
                         output_size=2,#Action[speed_x,speed_y]
                         time_factor=0,
-                        layers=[8, 8],
-                        activation='tanh',
+                        layers=[20, 20],
+                        activation='relu',
                         noise_bias=0.0,
                         output_noise=[False, False, False],
                         )
