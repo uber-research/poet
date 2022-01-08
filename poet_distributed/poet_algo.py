@@ -102,7 +102,7 @@ class MultiESOptimizer:
                 init_speed=100,
                 distance=100,
                 radius=0.1)
-            self.add_optimizer(env=env, seed=seed, model_params=model_params)
+            self.add_optimizer(env=env,seed = args.master_seed)
         else:
             env = Env_config(
                 name='tablette',
