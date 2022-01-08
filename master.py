@@ -28,7 +28,7 @@ def run_main(args,poet):
     #set master_seed
     np.random.seed(args.master_seed)
 
-    optimizer_zoo = MultiESOptimizer(args=args)
+    optimizer_zoo = MultiESOptimizer(args=args,poet = poet)
     print('Start to optimize')
     optimizer_zoo.optimize(iterations=args.n_iterations,
                        propose_with_adam=args.propose_with_adam,

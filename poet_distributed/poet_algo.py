@@ -45,7 +45,7 @@ def construct_niche_fns_from_env(args, env, seed):
 
 
 class MultiESOptimizer:
-    def __init__(self, args):
+    def __init__(self, args,poet = True):
 
         self.args = args
         import fiber as mp
@@ -95,7 +95,13 @@ class MultiESOptimizer:
                 logger.debug(env)
                 seed = exp['seed']
                 self.add_optimizer(env=env, seed=seed, model_params=model_params)
-
+        elif not poet:
+            env = Env_config(
+                name='tablette_dur',
+                init_height=10,
+                init_speed=100,
+                distance=100,
+                radius=0.1)
         else:
             env = Env_config(
                 name='tablette',
@@ -366,7 +372,7 @@ class MultiESOptimizer:
                 if iteration % steps_before_transfer == 0:
                     for o in self.optimizers.values():
                         o.save_to_logger(iteration)
-                return
+                continue
 
             self.adjust_envs_niches(iteration, self.args.adjust_interval * steps_before_transfer,
                                     max_num_envs=self.args.max_num_envs)
