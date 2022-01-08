@@ -312,15 +312,15 @@ class MultiESOptimizer:
             logger.info("list of niches to delete")
             logger.info(list_delete)
 
-            child_list = self.get_child_list(list_repro, max_children)
-
-            if child_list == None or len(child_list) == 0:
-                logger.info("mutation to reproduce env FAILED!!!")
-                return
-            # print(child_list)
-            admitted = 0
             nb_env_create = 0
             while not nb_env_create:
+                child_list = self.get_child_list(list_repro, max_children)
+
+                if child_list is None or len(child_list) == 0:
+                    logger.info("mutation to reproduce env FAILED!!!")
+                    return
+                # print(child_list)
+                admitted = 0
                 for child in child_list:
                     new_env_config, seed, _, _ = child
                     # targeted transfer
