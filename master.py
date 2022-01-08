@@ -21,7 +21,7 @@ from poet_distributed.es import initialize_master_fiber
 from poet_distributed.poet_algo import MultiESOptimizer
 
 
-def run_main(args):
+def run_main(args,poet):
 
     initialize_master_fiber()
 
@@ -34,7 +34,8 @@ def run_main(args):
                        propose_with_adam=args.propose_with_adam,
                        reset_optimizer=True,
                        checkpointing=args.checkpointing,
-                       steps_before_transfer=args.steps_before_transfer)
+                       steps_before_transfer=args.steps_before_transfer,
+                       poet = poet)
 
 def main():
     parser = ArgumentParser()
