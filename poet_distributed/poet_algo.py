@@ -100,7 +100,7 @@ class MultiESOptimizer:
                 name='tablette_dur',
                 init_height=10,
                 init_speed_x=100,
-                init_speed_y=30,
+                init_speed_y=100,
                 distance=100,
                 radius=0.1)
             self.add_optimizer(env=env,seed = args.master_seed)
