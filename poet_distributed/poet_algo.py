@@ -366,7 +366,7 @@ class MultiESOptimizer:
                  poet = True):
 
         for iteration in range(iterations):
-            # print('Iteration:',iteration)
+            print('Iteration:',iteration)
             if not poet:
                 self.ind_es_step(iteration=iteration)
                 if iteration % steps_before_transfer == 0:
