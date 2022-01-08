@@ -46,7 +46,7 @@ Game = namedtuple('Game', ['env_name', 'time_factor', 'input_size',
 #                         )
 
 flechette_custom = Game(env_name='Flechette-v0',
-                        input_size=3,#height,distance,speed
+                        input_size=4,#height,distance,speed_x,speed_y
                         output_size=2,#Action[speed_x,speed_y]
                         time_factor=0,
                         layers=[20, 20],

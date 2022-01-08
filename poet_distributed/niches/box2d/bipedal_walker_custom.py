@@ -47,7 +47,8 @@ from collections import namedtuple
 Env_config = namedtuple('Env_config', [
     'name',
     'init_height',
-    'init_speed',
+    'init_speed_x',
+    'init_speed_y',
     'distance',
     'radius'
 ])
@@ -169,12 +170,12 @@ class FlechetteCustom(gym.Env):
         #self.config[name='default_env',init_height = 0,init_speed = 0,distance = min_dist,radius = 1]
         hit = False
         done = False
-        state = [self.config.init_height,self.config.init_speed,self.config.distance]
+        state = [self.config.init_height,self.config.init_speed_x,self.config.init_speed_y,self.config.distance]
         def calcule_distance(v0,a,t):
             return 0.5 * a * t * t + v0 * t
-        time = self.config.distance / speed_x
+        time = self.config.distance / (speed_x-self.config.init_speed_x)
         G = 10
-        h_target = self.config.init_height - calcule_distance(self.config.init_speed,G,time)
+        h_target = self.config.init_height - calcule_distance(self.config.init_speed_y,G,time)
         h_agent =  - calcule_distance(speed_y,G,time)
         resultat_distance = abs(h_target - h_agent)
         if resultat_distance < self.config.radius:
