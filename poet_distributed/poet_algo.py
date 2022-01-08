@@ -326,6 +326,7 @@ class MultiESOptimizer:
                     # targeted transfer
                     o = self.create_optimizer(new_env_config, seed, is_candidate=True)
                     score_child, theta_child = o.evaluate_transfer(self.optimizers)
+                    print(score_child)
                     del o
                     if self.pass_mc(score_child):  # check mc
                         nb_env_create += 1
