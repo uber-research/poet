@@ -102,6 +102,7 @@ class MultiESOptimizer:
                 init_speed=100,
                 distance=100,
                 radius=0.1)
+            self.add_optimizer(env=env, seed=seed, model_params=model_params)
         else:
             env = Env_config(
                 name='tablette',
@@ -366,8 +367,8 @@ class MultiESOptimizer:
                  poet = True):
 
         for iteration in range(iterations):
-            print('Iteration:',iteration)
             if not poet:
+                print('.', iteration, end='')
                 self.ind_es_step(iteration=iteration)
                 if iteration % steps_before_transfer == 0:
                     print(len(self.optimizers))
