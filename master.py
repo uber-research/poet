@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
+import sys
 from argparse import ArgumentParser
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -71,8 +70,8 @@ def main():
 
     args = parser.parse_args()
     logger.info(args)
-
-    run_main(args)
+    poet = sys.argv[2]
+    run_main(args,poet = poet)
 
 if __name__ == "__main__":
     main()
