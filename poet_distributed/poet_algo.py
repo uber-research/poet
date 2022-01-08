@@ -370,6 +370,7 @@ class MultiESOptimizer:
             if not poet:
                 self.ind_es_step(iteration=iteration)
                 if iteration % steps_before_transfer == 0:
+                    print(len(self.optimizers))
                     for o in self.optimizers.values():
                         o.save_to_logger(iteration)
                         print('Best score:',o.get_best_score)
