@@ -236,7 +236,8 @@ class ESOptimizer:
     def __del__(self):
         logger.debug('Optimizer {} cleanning up workers...'.format(
             self.optim_id))
-
+    def get_best_score(self):
+        return self.best_score
     def clean_dicts_before_iter(self):
         self.log_data.clear()
         self.self_evals = None
