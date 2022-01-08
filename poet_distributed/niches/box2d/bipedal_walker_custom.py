@@ -184,7 +184,7 @@ class FlechetteCustom(gym.Env):
         else:
             reward = - resultat_distance/self.config.radius
         if self.config.init_speed_x>speed_x:
-            reward = -1000
+            reward = -(self.config.init_speed_x-speed_x)*1000
         done = True
         # print('Get a note:',reward)
         return np.array(state), reward, done, {"Hit": hit}
