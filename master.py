@@ -70,7 +70,9 @@ def main():
 
     args = parser.parse_args()
     logger.info(args)
-    poet = sys.argv[2]
+    poet = True
+    if len(sys.argv) >= 3:
+        poet = False
     run_main(args,poet = poet)
 
 if __name__ == "__main__":
