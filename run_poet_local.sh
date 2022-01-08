@@ -27,9 +27,9 @@ python -u master.py \
   --normalize_grads_by_noise_std \
   --returns_normalization=centered_ranks \
   --envs stump pit roughness \
-  --max_num_envs=25 \
+  --max_num_envs=10 \
   --adjust_interval=8 \
   --propose_with_adam \
   --steps_before_transfer=20 \
-  --num_workers 1 \
+  --num_workers 3 \
   --n_iterations=5000 2>&1 | tee ~/ipp/$experiment/run.log

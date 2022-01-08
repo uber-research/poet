@@ -319,18 +319,21 @@ class MultiESOptimizer:
                 return
             # print(child_list)
             admitted = 0
-            for child in child_list:
-                new_env_config, seed, _, _ = child
-                # targeted transfer
-                o = self.create_optimizer(new_env_config, seed, is_candidate=True)
-                score_child, theta_child = o.evaluate_transfer(self.optimizers)
-                del o
-                if self.pass_mc(score_child):  # check mc
-                    self.add_optimizer(env=new_env_config, seed=seed, created_at=iteration,
-                                       model_params=np.array(theta_child))
-                    admitted += 1
-                    if admitted >= max_admitted:
-                        break
+            nb_env_create = 0
+            while not nb_env_create:
+                for child in child_list:
+                    new_env_config, seed, _, _ = child
+                    # targeted transfer
+                    o = self.create_optimizer(new_env_config, seed, is_candidate=True)
+                    score_child, theta_child = o.evaluate_transfer(self.optimizers)
+                    del o
+                    if self.pass_mc(score_child):  # check mc
+                        nb_env_create += 1
+                        self.add_optimizer(env=new_env_config, seed=seed, created_at=iteration,
+                                           model_params=np.array(theta_child))
+                        admitted += 1
+                        if admitted >= max_admitted:
+                            break
 
             if max_num_envs and len(self.optimizers) > max_num_envs:
                 num_removals = len(self.optimizers) - max_num_envs
