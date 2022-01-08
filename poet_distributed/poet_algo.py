@@ -48,9 +48,7 @@ class MultiESOptimizer:
     def __init__(self, args):
 
         self.args = args
-
         import fiber as mp
-
         mp_ctx = mp.get_context('spawn')
         manager = mp_ctx.Manager()
         self.manager = manager
@@ -353,10 +351,18 @@ class MultiESOptimizer:
                  steps_before_transfer=25,
                  propose_with_adam=False,
                  checkpointing=False,
-                 reset_optimizer=True):
+                 reset_optimizer=True,
+                 poet = True):
 
         for iteration in range(iterations):
             # print('Iteration:',iteration)
+            if not poet:
+                self.ind_es_step(iteration=iteration)
+                if iteration % steps_before_transfer == 0:
+                    for o in self.optimizers.values():
+                        o.save_to_logger(iteration)
+                return
+
             self.adjust_envs_niches(iteration, self.args.adjust_interval * steps_before_transfer,
                                     max_num_envs=self.args.max_num_envs)
 
