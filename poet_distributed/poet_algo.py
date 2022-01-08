@@ -318,7 +318,8 @@ class MultiESOptimizer:
 
                 if child_list is None or len(child_list) == 0:
                     logger.info("mutation to reproduce env FAILED!!!")
-                    return
+                    continue
+                    # return
                 # print(child_list)
                 admitted = 0
                 for child in child_list:
