@@ -372,8 +372,6 @@ class MultiESOptimizer:
                 if iteration % steps_before_transfer == 0:
                     for o in self.optimizers.values():
                         o.save_to_logger(iteration)
-                if iteration == iterations - 2:
-                    for o in self.optimizers.values():
                         print('Best score:',o.get_best_score)
                 continue
 
