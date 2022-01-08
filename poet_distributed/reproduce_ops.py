@@ -73,7 +73,7 @@ class Reproducer:
         radius=parent.radius
 
         init_height, init_speed, distance, radius
-        def mutate_rand(v,max,min,rn = -1,rp = 1):
+        def mutate_rand(v,max,min,rn = 0,rp = 1):
             v = v + self.rs.uniform(rn, rp)
             if v > max:
                 v = max
@@ -82,19 +82,19 @@ class Reproducer:
             return v
         if 'init_height' in self.categories:
             max_height = 10
-            min_height = -5
+            min_height = 0
             init_height = mutate_rand(init_height,max_height,min_height)
 
         if 'init_speed' in self.categories:
             max_speed = 100
-            min_speed = -100
+            min_speed = 0
             init_speed = max(abs(init_speed),2)
-            init_speed = mutate_rand(init_height, max_speed, min_speed,-init_speed,init_speed)
+            init_speed = mutate_rand(init_height, max_speed, min_speed,rp = init_speed)
 
         if 'distance' in self.categories:
             max_d = 100
             min_d = 1
-            distance = mutate_rand(init_height, max_d, min_d,0,max(distance,2))
+            distance = mutate_rand(init_height, max_d, min_d,rp = max(distance,2))
 
         if 'radius' in self.categories:
             max_r = 2
