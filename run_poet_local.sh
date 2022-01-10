@@ -28,8 +28,8 @@ python -u master.py \
   --returns_normalization=centered_ranks \
   --envs stump pit roughness \
   --max_num_envs=10 \
-  --adjust_interval=8 \
+  --adjust_interval=2 \
   --propose_with_adam \
-  --steps_before_transfer=25 \
+  --steps_before_transfer=10 \
   --num_workers 2 \
   --n_iterations=5000 2>&1 | tee ~/ipp/$experiment/run.log
