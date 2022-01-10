@@ -264,7 +264,7 @@ class MultiESOptimizer:
             return True
 
     def pass_mc(self, score):
-        print('\n\n\n\npass_mc score:',score,self.args.mc_lower)
+        print('\n\n\n\npass_mc score:',score,self.args.mc_lower,self.args.mc_upper)
         if score < self.args.mc_lower or score > self.args.mc_upper:
             return False
         else:
@@ -299,6 +299,7 @@ class MultiESOptimizer:
                 score = o.evaluate_theta(self.optimizers[parent_optim_id].theta)
                 del o
                 if self.pass_mc(score):
+                    print('pass',score)
                     novelty_score = compute_novelty_vs_archive(self.env_archive, new_env_config, k=5)
                     logger.debug("{} passed mc, novelty score {}".format(score, novelty_score))
                     child_list.append((new_env_config, seed, parent_optim_id, novelty_score))
