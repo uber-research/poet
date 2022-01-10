@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import sys
+
+
 from argparse import ArgumentParser
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -21,25 +22,22 @@ from poet_distributed.es import initialize_master_fiber
 from poet_distributed.poet_algo import MultiESOptimizer
 
 
-def run_main(args,poet):
+def run_main(args):
 
     initialize_master_fiber()
 
     #set master_seed
     np.random.seed(args.master_seed)
 
-    optimizer_zoo = MultiESOptimizer(args=args,poet = poet)
-    print('Start to optimize')
+    optimizer_zoo = MultiESOptimizer(args=args)
+
     optimizer_zoo.optimize(iterations=args.n_iterations,
                        propose_with_adam=args.propose_with_adam,
                        reset_optimizer=True,
                        checkpointing=args.checkpointing,
-                       steps_before_transfer=args.steps_before_transfer,
-                       poet = poet)
+                       steps_before_transfer=args.steps_before_transfer)
 
 def main():
-    poet = True
-
     parser = ArgumentParser()
     parser.add_argument('log_file')
     parser.add_argument('--init', default='random')
@@ -53,14 +51,14 @@ def main():
     parser.add_argument('--batches_per_chunk', type=int, default=50)
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--eval_batch_size', type=int, default=1)
-    parser.add_argument('--eval_batches_per_step', type=int, default=10)
+    parser.add_argument('--eval_batches_per_step', type=int, default=50)
     parser.add_argument('--num_workers', type=int, default=20)
     parser.add_argument('--n_iterations', type=int, default=200)
     parser.add_argument('--steps_before_transfer', type=int, default=25)
     parser.add_argument('--master_seed', type=int, default=111)
-    parser.add_argument('--mc_lower', type=int, default=-1000)
-    parser.add_argument('--mc_upper', type=int, default=0.5)
-    parser.add_argument('--repro_threshold', type=int, default=0.3)
+    parser.add_argument('--mc_lower', type=int, default=25)
+    parser.add_argument('--mc_upper', type=int, default=340)
+    parser.add_argument('--repro_threshold', type=int, default=200)
     parser.add_argument('--max_num_envs', type=int, default=100)
     parser.add_argument('--normalize_grads_by_noise_std', action='store_true', default=False)
     parser.add_argument('--propose_with_adam', action='store_true', default=False)
@@ -74,7 +72,7 @@ def main():
     args = parser.parse_args()
     logger.info(args)
 
-    run_main(args,poet = poet)
+    run_main(args)
 
 if __name__ == "__main__":
     main()

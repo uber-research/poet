@@ -236,8 +236,7 @@ class ESOptimizer:
     def __del__(self):
         logger.debug('Optimizer {} cleanning up workers...'.format(
             self.optim_id))
-    def get_best_score(self):
-        return self.best_score
+
     def clean_dicts_before_iter(self):
         self.log_data.clear()
         self.self_evals = None
@@ -414,11 +413,7 @@ class ESOptimizer:
         return chunk_tasks
 
     def get_chunk(self, tasks):
-        res = []
-        for task in tasks:
-            aux = task.get()
-            res.append(aux)
-        return res
+        return [task.get() for task in tasks]
 
     def collect_po_results(self, po_results):
         noise_inds = np.concatenate([r.noise_inds for r in po_results])

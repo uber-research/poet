@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .box2d import Flechette
+from .box2d import Box2DNiche

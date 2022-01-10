@@ -14,4 +14,4 @@
 
 
 from .core import Niche
-from .box2d import Flechette
+from .box2d import Box2DNiche

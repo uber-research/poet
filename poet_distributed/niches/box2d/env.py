@@ -5,13 +5,13 @@
 
 from collections import namedtuple
 # import gym
-from .bipedal_walker_custom import FlechetteCustom, Env_config  # noqa
+from .bipedal_walker_custom import BipedalWalkerCustom, Env_config  # noqa
 
 
 def make_env(env_name, seed, render_mode=False, env_config=None):
-    if env_name.startswith("Flechette"):
+    if env_name.startswith("BipedalWalkerCustom"):
         assert env_config is not None
-        env = FlechetteCustom(env_config)
+        env = BipedalWalkerCustom(env_config)
     else:
         # env = gym.make(env_name)
         raise Exception('Got env_name {}'.format(env_name))
@@ -35,22 +35,12 @@ Game = namedtuple('Game', ['env_name', 'time_factor', 'input_size',
                            'output_size', 'layers', 'activation', 'noise_bias',
                            'output_noise'])
 
-# bipedhard_custom = Game(env_name='BipedalWalkerCustom-v0',
-#                         input_size=24,
-#                         output_size=4,
-#                         time_factor=0,
-#                         layers=[40, 40],
-#                         activation='tanh',
-#                         noise_bias=0.0,
-#                         output_noise=[False, False, False],
-#                         )
-
-flechette_custom = Game(env_name='Flechette-v0',
-                        input_size=4,#height,distance,speed_x,speed_y
-                        output_size=2,#Action[speed_x,speed_y]
+bipedhard_custom = Game(env_name='BipedalWalkerCustom-v0',
+                        input_size=24,
+                        output_size=4,
                         time_factor=0,
-                        layers=[20, 20],
-                        activation='relu',
+                        layers=[30, 30],
+                        activation='tanh',
                         noise_bias=0.0,
                         output_noise=[False, False, False],
                         )

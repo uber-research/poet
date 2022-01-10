@@ -15,7 +15,6 @@
 
 from .logger import CSVLogger
 import logging
-
 logger = logging.getLogger(__name__)
 import numpy as np
 from poet_distributed.es import ESOptimizer
@@ -30,11 +29,11 @@ import json
 def construct_niche_fns_from_env(args, env, seed):
     def niche_wrapper(configs, seed):  # force python to make a new lexical scope
         def make_niche():
-            from poet_distributed.niches import Flechette
-            return Flechette(env_configs=configs,
-                              seed=seed,
-                              init=args.init,
-                              stochastic=args.stochastic)
+            from poet_distributed.niches import Box2DNiche
+            return Box2DNiche(env_configs=configs,
+                            seed=seed,
+                            init=args.init,
+                            stochastic=args.stochastic)
 
         return make_niche
 
@@ -45,20 +44,22 @@ def construct_niche_fns_from_env(args, env, seed):
 
 
 class MultiESOptimizer:
-    def __init__(self, args,poet = True):
+    def __init__(self, args):
 
         self.args = args
+
         import fiber as mp
+
         mp_ctx = mp.get_context('spawn')
         manager = mp_ctx.Manager()
         self.manager = manager
         self.fiber_shared = {
-            "niches": manager.dict(),
-            "thetas": manager.dict(),
+                "niches": manager.dict(),
+                "thetas": manager.dict(),
         }
         self.fiber_pool = mp_ctx.Pool(args.num_workers, initializer=initialize_worker_fiber,
-                                      initargs=(self.fiber_shared["thetas"],
-                                                self.fiber_shared["niches"]))
+                initargs=(self.fiber_shared["thetas"],
+                    self.fiber_shared["niches"]))
 
         self.env_registry = OrderedDict()
         self.env_archive = OrderedDict()
@@ -76,7 +77,7 @@ class MultiESOptimizer:
 
             path = start_from_config['path']
             exp_name = start_from_config['exp_name']
-            prefix = path + exp_name + '/' + exp_name + '.'
+            prefix = path + exp_name +'/'+exp_name+'.'
             for niche_name, niche_file in sorted(start_from_config['niches'].items()):
                 logger.debug(niche_name)
                 niche_file_complete = prefix + niche_file
@@ -95,23 +96,12 @@ class MultiESOptimizer:
                 logger.debug(env)
                 seed = exp['seed']
                 self.add_optimizer(env=env, seed=seed, model_params=model_params)
-        elif not poet:
-            env = Env_config(
-                name='tablette_dur',
-                init_height=10,
-                init_speed_x=100,
-                init_speed_y=100,
-                distance=100,
-                radius=0.1)
-            self.add_optimizer(env=env,seed = args.master_seed)
+
         else:
             env = Env_config(
-                name='tablette',
-                init_height=1,
-                init_speed_x=1,
-                init_speed_y=1,
-                distance=1,
-                radius=1)
+                name='flat',
+                ground_roughness=0,
+                pit_gap=[])
 
             self.add_optimizer(env=env, seed=args.master_seed)
 
@@ -125,7 +115,7 @@ class MultiESOptimizer:
         if model_params is not None:
             theta = np.array(model_params)
         else:
-            theta = niche.initial_theta()
+            theta=niche.initial_theta()
         assert optim_id not in self.optimizers.keys()
 
         return ESOptimizer(
@@ -151,6 +141,7 @@ class MultiESOptimizer:
             created_at=created_at,
             is_candidate=is_candidate)
 
+
     def add_optimizer(self, env, seed, created_at=0, model_params=None):
         '''
             creat a new optimizer/niche
@@ -164,16 +155,16 @@ class MultiESOptimizer:
         assert optim_id not in self.env_archive.keys()
         self.env_registry[optim_id] = env
         self.env_archive[optim_id] = env
-        # dump the env
+        #dump the env
         log_file = self.args.log_file
         env_config_file = log_file + '/' + log_file.split('/')[-1] + '.' + optim_id + '.env.json'
         record = {'config': env._asdict(), 'seed': seed}
-        with open(env_config_file, 'w') as f:
+        with open(env_config_file,'w') as f:
             json.dump(record, f)
 
     def delete_optimizer(self, optim_id):
         assert optim_id in self.optimizers.keys()
-        # assume optim_id == env_id for single_env niches
+        #assume optim_id == env_id for single_env niches
         o = self.optimizers.pop(optim_id)
         del o
         assert optim_id in self.env_registry.keys()
@@ -182,7 +173,9 @@ class MultiESOptimizer:
 
     def ind_es_step(self, iteration):
         tasks = [o.start_step() for o in self.optimizers.values()]
+
         for optimizer, task in zip(self.optimizers.values(), tasks):
+
             optimizer.theta, stats = optimizer.get_step(task)
             self_eval_task = optimizer.start_theta_eval(optimizer.theta)
             self_eval_stats = optimizer.get_theta_eval(self_eval_task)
@@ -192,15 +185,14 @@ class MultiESOptimizer:
                 stats.po_returns_max, iteration - optimizer.created_at))
 
             optimizer.update_dicts_after_es(stats=stats,
-                                           self_eval_stats=self_eval_stats)
-
+                self_eval_stats=self_eval_stats)
 
     def transfer(self, propose_with_adam, checkpointing, reset_optimizer):
         logger.info('Computing direct transfers...')
         for source_optim in self.optimizers.values():
             source_tasks = []
             for target_optim in [o for o in self.optimizers.values()
-                                 if o is not source_optim]:
+                                    if o is not source_optim]:
                 task = target_optim.start_theta_eval(
                     source_optim.theta)
                 source_tasks.append((task, target_optim))
@@ -209,14 +201,14 @@ class MultiESOptimizer:
                 stats = target_optim.get_theta_eval(task)
 
                 target_optim.update_dicts_after_transfer(source_optim_id=source_optim.optim_id,
-                                                         source_optim_theta=source_optim.theta,
-                                                         stats=stats, keyword='theta')
+                    source_optim_theta=source_optim.theta,
+                    stats=stats, keyword='theta')
 
         logger.info('Computing proposal transfers...')
         for source_optim in self.optimizers.values():
             source_tasks = []
             for target_optim in [o for o in self.optimizers.values()
-                                 if o is not source_optim]:
+                                    if o is not source_optim]:
                 task = target_optim.start_step(source_optim.theta)
                 source_tasks.append((task, target_optim))
 
@@ -228,8 +220,8 @@ class MultiESOptimizer:
                 proposal_eval_stats = target_optim.get_theta_eval(proposal_eval_task)
 
                 target_optim.update_dicts_after_transfer(source_optim_id=source_optim.optim_id,
-                                                         source_optim_theta=proposed_theta,
-                                                         stats=proposal_eval_stats, keyword='proposal')
+                    source_optim_theta=proposed_theta,
+                    stats=proposal_eval_stats, keyword='proposal')
 
         logger.info('Considering transfers...')
         for o in self.optimizers.values():
@@ -245,7 +237,6 @@ class MultiESOptimizer:
             o = self.optimizers[optim_id]
             logger.info("niche {} created at {} start_score {} current_self_evals {}".format(
                 optim_id, o.created_at, o.start_score, o.self_evals))
-            print('self_evals',o.self_evals)
             if o.self_evals >= self.args.repro_threshold:
                 repro_candidates.append(optim_id)
 
@@ -256,6 +247,7 @@ class MultiESOptimizer:
 
         return repro_candidates, delete_candidates
 
+
     def pass_dedup(self, env_config):
         if env_config.name in self.env_registry.keys():
             logger.debug("active env already. reject!")
@@ -264,7 +256,6 @@ class MultiESOptimizer:
             return True
 
     def pass_mc(self, score):
-        # print('\n\n\n\npass_mc score:',score,self.args.mc_lower,self.args.mc_upper)
         if score < self.args.mc_lower or score > self.args.mc_upper:
             return False
         else:
@@ -299,19 +290,17 @@ class MultiESOptimizer:
                 score = o.evaluate_theta(self.optimizers[parent_optim_id].theta)
                 del o
                 if self.pass_mc(score):
-                    print('pass',score)
                     novelty_score = compute_novelty_vs_archive(self.env_archive, new_env_config, k=5)
                     logger.debug("{} passed mc, novelty score {}".format(score, novelty_score))
                     child_list.append((new_env_config, seed, parent_optim_id, novelty_score))
 
-        # sort child list according to novelty for high to low
-        child_list = sorted(child_list, key=lambda x: x[3], reverse=True)
+        #sort child list according to novelty for high to low
+        child_list = sorted(child_list,key=lambda x: x[3], reverse=True)
         return child_list
 
     def adjust_envs_niches(self, iteration, steps_before_adjust, max_num_envs=None, max_children=8, max_admitted=1):
-        # print('adjust_envs_niches',iteration,steps_before_adjust)
+
         if iteration > 0 and iteration % steps_before_adjust == 0:
-            # print('adjust_envs_niches\n\n\n\n\n')
             list_repro, list_delete = self.check_optimizer_status(iteration)
 
             if len(list_repro) == 0:
@@ -322,32 +311,24 @@ class MultiESOptimizer:
             logger.info("list of niches to delete")
             logger.info(list_delete)
 
-            nb_env_create = 0
-            max_try = 20
-            while not nb_env_create and max_try >= 0:
-                max_try += -1
-                child_list = self.get_child_list(list_repro, max_children)
+            child_list = self.get_child_list(list_repro, max_children)
 
-                if child_list is None or len(child_list) == 0:
-                    logger.info("mutation to reproduce env FAILED!!!")
-                    continue
-                    # return
-                # print(child_list)
-                admitted = 0
-                for child in child_list:
-                    new_env_config, seed, _, _ = child
-                    # targeted transfer
-                    o = self.create_optimizer(new_env_config, seed, is_candidate=True)
-                    score_child, theta_child = o.evaluate_transfer(self.optimizers)
-                    # print(score_child)
-                    del o
-                    if self.pass_mc(score_child):  # check mc
-                        nb_env_create += 1
-                        self.add_optimizer(env=new_env_config, seed=seed, created_at=iteration,
-                                           model_params=np.array(theta_child))
-                        admitted += 1
-                        if admitted >= max_admitted:
-                            break
+            if child_list == None or len(child_list) == 0:
+                logger.info("mutation to reproduce env FAILED!!!")
+                return
+            #print(child_list)
+            admitted = 0
+            for child in child_list:
+                new_env_config, seed, _, _ = child
+                # targeted transfer
+                o = self.create_optimizer(new_env_config, seed, is_candidate=True)
+                score_child, theta_child = o.evaluate_transfer(self.optimizers)
+                del o
+                if self.pass_mc(score_child):  # check mc
+                    self.add_optimizer(env=new_env_config, seed=seed, created_at=iteration, model_params=np.array(theta_child))
+                    admitted += 1
+                    if admitted >= max_admitted:
+                        break
 
             if max_num_envs and len(self.optimizers) > max_num_envs:
                 num_removals = len(self.optimizers) - max_num_envs
@@ -368,25 +349,16 @@ class MultiESOptimizer:
                  steps_before_transfer=25,
                  propose_with_adam=False,
                  checkpointing=False,
-                 reset_optimizer=True,
-                 poet = True):
+                 reset_optimizer=True):
 
         for iteration in range(iterations):
-            if not poet:
-                print('.', iteration, end='')
-                self.ind_es_step(iteration=iteration)
-                if iteration % steps_before_transfer == 0:
-                    print(len(self.optimizers))
-                    for o in self.optimizers.values():
-                        o.save_to_logger(iteration)
-                        print('Best score:',o.get_best_score)
-                continue
 
             self.adjust_envs_niches(iteration, self.args.adjust_interval * steps_before_transfer,
                                     max_num_envs=self.args.max_num_envs)
 
             for o in self.optimizers.values():
                 o.clean_dicts_before_iter()
+
             self.ind_es_step(iteration=iteration)
 
             if len(self.optimizers) > 1 and iteration % steps_before_transfer == 0:
