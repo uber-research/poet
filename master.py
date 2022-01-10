@@ -38,6 +38,10 @@ def run_main(args,poet):
                        poet = poet)
 
 def main():
+    poet = True
+    if len(sys.argv) >= 3:
+        print('Sans poet',len(sys.argv))
+        poet = False
     parser = ArgumentParser()
     parser.add_argument('log_file')
     parser.add_argument('--init', default='random')
@@ -71,10 +75,7 @@ def main():
 
     args = parser.parse_args()
     logger.info(args)
-    poet = True
-    if len(sys.argv) >= 4:
-        print('Sans poet',len(sys.argv))
-        poet = False
+
     run_main(args,poet = poet)
 
 if __name__ == "__main__":
