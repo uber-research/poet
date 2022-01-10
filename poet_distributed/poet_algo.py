@@ -108,7 +108,8 @@ class MultiESOptimizer:
             env = Env_config(
                 name='tablette',
                 init_height=1,
-                init_speed=1,
+                init_speed_x=1,
+                init_speed_y=1,
                 distance=1,
                 radius=1)
 
