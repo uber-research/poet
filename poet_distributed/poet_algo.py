@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import time
 
 from .logger import CSVLogger
 import logging
@@ -185,10 +185,10 @@ class MultiESOptimizer:
             optimizer.theta, stats = optimizer.get_step(task)
             self_eval_task = optimizer.start_theta_eval(optimizer.theta)
             self_eval_stats = optimizer.get_theta_eval(self_eval_task)
-
-            logger.info('Iter={} Optimizer {} theta_mean {} best po {} iteration spent {}'.format(
+            temp = time.time()
+            logger.info('Iter={} Optimizer {} theta_mean {} best po {} iteration spent {} at time {}'.format(
                 iteration, optimizer.optim_id, self_eval_stats.eval_returns_mean,
-                stats.po_returns_max, iteration - optimizer.created_at))
+                stats.po_returns_max, iteration - optimizer.created_at,temp))
 
             optimizer.update_dicts_after_es(stats=stats,
                 self_eval_stats=self_eval_stats)
