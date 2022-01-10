@@ -39,7 +39,8 @@ def run_main(args,poet):
 
 def main():
     poet = True
-    if len(sys.argv) >= 3:
+    print(sys.argv[-1])
+    if sys.argv[-1] == 'es':
         print('Sans poet',len(sys.argv))
         poet = False
     parser = ArgumentParser()
