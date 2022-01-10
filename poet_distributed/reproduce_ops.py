@@ -89,14 +89,14 @@ class Reproducer:
         if 'init_speed_x' in self.categories:
             max_speed = 100
             min_speed = 0
-            init_speed = max(abs(init_speed_x),5)
-            init_speed = mutate_rand(init_height, max_speed, min_speed,rp = init_speed_x)
+            init_speed_x = max(abs(init_speed_x),5)
+            init_speed_x = mutate_rand(init_height, max_speed, min_speed,rp = init_speed_x)
 
         if 'init_speed_y' in self.categories:
             max_speed = 100
             min_speed = 0
-            init_speed = max(abs(init_speed_y),5)
-            init_speed = mutate_rand(init_height, max_speed, min_speed,rp = init_speed_y)
+            init_speed_y = max(abs(init_speed_y),5)
+            init_speed_y = mutate_rand(init_height, max_speed, min_speed,rp = init_speed_y)
 
         if 'distance' in self.categories:
             max_d = 100
