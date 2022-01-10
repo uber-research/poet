@@ -16,7 +16,7 @@
 import numpy as np
 
 def env2array(env):
-    arr = [0., 0., 0., 0.]
+    arr = [0., 0., 0., 0., 0.]
     #arr[0] = env.ground_roughness
     #if len(env.pit_gap) > 0:
     #    arr[1] = env.pit_gap[0]
@@ -25,9 +25,10 @@ def env2array(env):
     #    arr[3] = env.stump_height[0]
     #    arr[4] = env.stump_height[1]
     arr[0] = env.init_height
-    arr[1] = env.init_speed
-    arr[2] = env.distance
-    arr[3] = env.radius
+    arr[1] = env.init_speed_x
+    arr[2] = env.init_speed_x
+    arr[3] = env.distance
+    arr[4] = env.radius
 
     return arr
 
@@ -41,7 +42,7 @@ def euclidean_distance(nx, ny, normalize=False):
 
     if normalize:
         #norm = np.array([8., 8., 8., 3., 3.])
-        norm = np.array([8., 8., 8., 3.])
+        norm = np.array([8., 8., 8., 3., 3.])
         x /= norm
         y /= norm
 
