@@ -264,7 +264,7 @@ class MultiESOptimizer:
             return True
 
     def pass_mc(self, score):
-        print('\n\n\n\npass_mc score:',score,self.args.mc_lower,self.args.mc_upper)
+        # print('\n\n\n\npass_mc score:',score,self.args.mc_lower,self.args.mc_upper)
         if score < self.args.mc_lower or score > self.args.mc_upper:
             return False
         else:
@@ -339,7 +339,7 @@ class MultiESOptimizer:
                     # targeted transfer
                     o = self.create_optimizer(new_env_config, seed, is_candidate=True)
                     score_child, theta_child = o.evaluate_transfer(self.optimizers)
-                    print(score_child)
+                    # print(score_child)
                     del o
                     if self.pass_mc(score_child):  # check mc
                         nb_env_create += 1
