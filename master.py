@@ -72,7 +72,7 @@ def main():
     args = parser.parse_args()
     logger.info(args)
     poet = True
-    if len(sys.argv) >= 3:
+    if len(sys.argv) >= 4:
         print('Sans poet')
         poet = False
     run_main(args,poet = poet)
