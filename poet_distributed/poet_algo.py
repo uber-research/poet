@@ -322,7 +322,9 @@ class MultiESOptimizer:
             logger.info(list_delete)
 
             nb_env_create = 0
-            while not nb_env_create:
+            max_try = 20
+            while not nb_env_create or max_try >= 0:
+                max_try += -1
                 child_list = self.get_child_list(list_repro, max_children)
 
                 if child_list is None or len(child_list) == 0:
