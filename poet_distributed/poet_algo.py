@@ -101,7 +101,13 @@ class MultiESOptimizer:
             env = Env_config(
                 name='flat',
                 ground_roughness=0,
-                pit_gap=[])
+                pit_gap=[],
+                stump_width=[],
+                stump_height=[],
+                stump_float=[],
+                stair_height=[],
+                stair_width=[],
+                stair_steps=[])
 
             self.add_optimizer(env=env, seed=args.master_seed)
 
