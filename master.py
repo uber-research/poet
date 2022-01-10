@@ -73,7 +73,7 @@ def main():
     logger.info(args)
     poet = True
     if len(sys.argv) >= 4:
-        print('Sans poet')
+        print('Sans poet',len(sys.argv))
         poet = False
     run_main(args,poet = poet)
 
