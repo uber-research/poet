@@ -110,7 +110,7 @@ class Reproducer:
 
 
 
-        child_name = name_env_config(init_height,init_speed,distance,radius)
+        child_name = name_env_config(init_height,init_speed_x,init_speed_y,distance,radius)
 
         child = Env_config(
             name=child_name,
