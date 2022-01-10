@@ -17,10 +17,10 @@ from poet_distributed.niches.box2d.env import Env_config
 import numpy as np
 
 
-def name_env_config(init_height,init_speed,distance,radius):
+def name_env_config(init_height,init_speed_x,init_speed_y,distance,radius):
 
     env_name = 'Tablette_' + str(round(init_height,2))  + '_'+\
-               str(round(init_speed,2)) + '_'+ str(round(distance,2)) \
+               str(round(init_speed_x,2)) + '_'+str(round(init_speed_y,2)) + '_'+ str(round(distance,2)) \
                + '_' + str(round(radius,2))
     return env_name
 
