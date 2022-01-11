@@ -307,6 +307,7 @@ class MultiESOptimizer:
     def adjust_envs_niches(self, iteration, steps_before_adjust, max_num_envs=None, max_children=8, max_admitted=1):
 
         if iteration > 0 and iteration % steps_before_adjust == 0:
+            print("new_env-------------")
             list_repro, list_delete = self.check_optimizer_status(iteration)
 
             if len(list_repro) == 0:
@@ -364,7 +365,7 @@ class MultiESOptimizer:
 
         for iteration in range(iterations):
 
-            self.adjust_envs_niches(iteration, self.args.adjust_interval * steps_before_transfer,
+            self.adjust_envs_niches(iteration, 20,
                                     max_num_envs=self.args.max_num_envs)
 
             for o in self.optimizers.values():
