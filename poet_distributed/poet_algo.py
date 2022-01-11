@@ -316,25 +316,30 @@ class MultiESOptimizer:
             logger.info(list_repro)
             logger.info("list of niches to delete")
             logger.info(list_delete)
+            flag_new = True
+            nb_try = 0
+            while flag_new or nb_try >= 20:
+                nb_try += 1
+                child_list = self.get_child_list(list_repro, max_children)
 
-            child_list = self.get_child_list(list_repro, max_children)
-
-            if child_list == None or len(child_list) == 0:
-                logger.info("mutation to reproduce env FAILED!!!")
-                return
-            #print(child_list)
-            admitted = 0
-            for child in child_list:
-                new_env_config, seed, _, _ = child
-                # targeted transfer
-                o = self.create_optimizer(new_env_config, seed, is_candidate=True)
-                score_child, theta_child = o.evaluate_transfer(self.optimizers)
-                del o
-                if self.pass_mc(score_child):  # check mc
-                    self.add_optimizer(env=new_env_config, seed=seed, created_at=iteration, model_params=np.array(theta_child))
-                    admitted += 1
-                    if admitted >= max_admitted:
-                        break
+                if child_list == None or len(child_list) == 0:
+                    logger.info("mutation to reproduce env FAILED!!!")
+                    return
+                #print(child_list)
+                admitted = 0
+                for child in child_list:
+                    new_env_config, seed, _, _ = child
+                    # targeted transfer
+                    o = self.create_optimizer(new_env_config, seed, is_candidate=True)
+                    score_child, theta_child = o.evaluate_transfer(self.optimizers)
+                    del o
+                    print(nb_try," try,score:",score_child)
+                    if self.pass_mc(score_child):  # check mc
+                        flag_new = False
+                        self.add_optimizer(env=new_env_config, seed=seed, created_at=iteration, model_params=np.array(theta_child))
+                        admitted += 1
+                        if admitted >= max_admitted:
+                            break
 
             if max_num_envs and len(self.optimizers) > max_num_envs:
                 num_removals = len(self.optimizers) - max_num_envs
