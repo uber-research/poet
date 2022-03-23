@@ -405,7 +405,7 @@ class ESOptimizer:
         logger.debug('Optimizer {} delete env {}...'.format(self.optim_id, env_name))
 
         niches = self.fiber_shared["niches"]
-        niches[optim_id].delete_env(env_name)
+        niches[self.optim_id].delete_env(env_name)
 
     def start_chunk_fiber(self, runner, batches_per_chunk, batch_size, *args):
         logger.debug('Optimizer {} spawning {} batches of size {}'.format(
@@ -594,10 +594,10 @@ class ESOptimizer:
 
         raw_scores = []
         for source_optim in archived_optimizers.values():
-            raw_scores.append(cap_score(self.evaluate_theta(source_optim.theta)))
+            raw_scores.append(cap_score(self.evaluate_theta(source_optim.theta), lower_bound, upper_bound))
 
         for source_optim in optimizers.values():
-            raw_scores.append(cap_score(self.evaluate_theta(source_optim.theta)))
+            raw_scores.append(cap_score(self.evaluate_theta(source_optim.theta), lower_bound, upper_bound))
 
         self.pata_ec = compute_centered_ranks(np.array(raw_scores))
 
